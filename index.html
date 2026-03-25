@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Deal — A Solitaire Card Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #e8ddc4;
+  --bg2: #ddd2b8;
+  --bg3: #d2c6aa;
+  --gold: #6b2a14;
+  --gold-dim: #4a3020;
+  --cream: #f2ead2;
+  --card-bg: #f2ead2;
+  --crisis-bg: #e8d4ba;
+  --crisis-border: #7a1a0a;
+  --crisis-text: #7a1a0a;
+  --text: #2a1a0e;
+  --text-dim: #6a5a44;
+  --text-dark: #1a0e05;
+  --green: #2a5a1e;
+  --red: #8b1a1a;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --cat-IC: #2a4470; --cat-AR: #3a5a2a; --cat-FN: #6a5a14;
+  --cat-BK: #4a2a6a; --cat-NS: #7a2a1a; --cat-IF: #7a4a14;
+  --cat-PW: #1a4a5a; --cat-WF: #6a2a4a;
+  --max-w: 1400px;
+  --rule: #b8a47a;
+  --rule-dark: #7a6a4a;
+}
+
+html { font-size: 18px; }
+body {
+  font-family: var(--sans); background-color: var(--bg); color: var(--text);
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(250,245,225,0.4) 0%, transparent 55%);
+  position: relative;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(80,60,30,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(80,60,30,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(80,60,30,0.04) 100%);
+}
+
+/* ===== HEADER ===== */
+header {
+  width: 100%; max-width: var(--max-w); padding: 1rem 2rem 0.5rem;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;
+}
+h1 {
+  font-family: var(--serif); font-weight: 900; font-size: 2rem;
+  color: var(--text-dark); letter-spacing: 0.15em; text-transform: uppercase;
+}
+.hud { display: flex; gap: 1.5rem; align-items: center; }
+.hud-item { display: flex; flex-direction: column; align-items: center; }
+.hud-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); }
+.hud-value { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; color: var(--text-dark); }
+.hud-phase {
+  font-size: 0.85rem; padding: 0.25rem 1rem;
+  border: 2px solid var(--rule-dark); background: transparent;
+  color: var(--text-dark); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ===== DECO ===== */
+.deco { width: 100%; max-width: var(--max-w); height: 0; border-top: 3px double var(--rule-dark); margin: 0.3rem 0; }
+
+/* ===== SCOREBOARD ===== */
+.scoreboard {
+  width: 100%; max-width: var(--max-w); padding: 0.6rem 2rem;
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.score-cell {
+  text-align: center; padding: 0.5rem 0.3rem;
+  background: transparent; border-left: 1px solid var(--rule); position: relative; transition: all 0.3s;
+}
+.score-cell:first-child { border-left: none; }
+.score-cell .cat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+.score-cell .cat-name { font-size: 0.65rem; color: var(--text-dim); }
+.score-cell .cat-score { font-family: var(--serif); font-size: 1.8rem; font-weight: 700; color: var(--text-dark); }
+.score-cell.flash-up { background: rgba(42,90,30,0.08); }
+.score-cell.flash-down { background: rgba(139,26,26,0.08); }
+.score-pop {
+  position: absolute; top: -0.6rem; right: 0.4rem; font-size: 1.1rem; font-weight: 700;
+  animation: popUp 1.4s ease-out forwards; pointer-events: none;
+}
+@keyframes popUp {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-1.5rem); }
+}
+
+/* ===== HELP PANEL ===== */
+.help-panel {
+  width: 100%; max-width: var(--max-w); padding: 0 2rem; margin: 0.4rem 0;
+}
+.help-box {
+  background: var(--cream); border: 1px solid var(--rule); border-left: 4px solid var(--rule-dark);
+  padding: 1rem 1.4rem; font-size: 0.95rem; line-height: 1.6; color: var(--text-dim);
+}
+.help-box .help-title {
+  font-weight: 700; color: var(--text-dark); font-family: var(--serif);
+  font-size: 0.85rem; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 0.3rem;
+}
+.help-box b { color: var(--text-dark); }
+.help-box .help-tip {
+  margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--rule);
+  font-size: 0.85rem; color: var(--text-dim); font-style: italic;
+}
+
+/* ===== MESSAGE AREA ===== */
+.message-area {
+  width: 100%; max-width: var(--max-w); padding: 0.7rem 2rem 0.3rem; text-align: center;
+}
+.msg { font-size: 1.15rem; color: var(--text); line-height: 1.5; }
+.msg b { color: var(--text-dark); font-family: var(--serif); }
+.msg.crisis-msg { color: var(--crisis-text); }
+
+/* ===== BUTTONS ===== */
+.btn {
+  font-family: var(--sans); font-size: 1rem; font-weight: 600;
+  padding: 0.6rem 1.6rem; border: 2px solid var(--text-dark); cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.06em; transition: all 0.15s;
+}
+.btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.35; cursor: default; filter: none; transform: none; }
+.btn-gold { background: var(--text-dark); color: var(--cream); border-color: var(--text-dark); }
+.btn-gold:hover { background: #2a1a0e; }
+.btn-outline { background: transparent; border: 2px solid var(--rule-dark); color: var(--text-dark); }
+.btn-outline:hover { background: rgba(0,0,0,0.04); }
+.btn-sm { font-size: 0.8rem; padding: 0.35rem 0.9rem; }
+.btn-lg { font-size: 1.2rem; padding: 0.8rem 2.5rem; }
+.btn-group { display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: center; align-items: center; }
+.pass-link { font-size: 0.8rem; color: var(--text-dim); cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
+.pass-link:hover { color: var(--text-dark); }
+
+/* ===== HAND ===== */
+.hand-area {
+  width: 100%; max-width: var(--max-w); padding: 0.5rem 1.5rem;
+  display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center;
+  min-height: 220px; align-items: flex-start;
+}
+
+/* ===== CARDS ===== */
+.card {
+  width: 175px; min-height: 200px; border-radius: 2px; padding: 0.7rem 0.75rem;
+  display: flex; flex-direction: column; gap: 0.3rem; cursor: default;
+  border: 1.5px solid var(--rule-dark); background: var(--card-bg); color: var(--text-dark);
+  font-size: 0.85rem; position: relative; transition: all 0.15s;
+  box-shadow: 1px 2px 6px rgba(0,0,0,0.1);
+}
+.card:hover { transform: translateY(-5px); box-shadow: 2px 5px 14px rgba(0,0,0,0.15); }
+.card.clickable { cursor: pointer; border-color: var(--text-dark); }
+.card.clickable:hover { border-color: var(--gold); box-shadow: 2px 5px 14px rgba(107,42,20,0.18); }
+.card.selected { border-color: var(--gold); background: #e8d4b4; box-shadow: 0 0 10px rgba(107,42,20,0.18); transform: translateY(-8px); }
+.card.cat-highlight:not(.dimmed):not(.selected) { transform: translateY(-5px); box-shadow: 2px 5px 12px rgba(107,42,20,0.12); }
+.card.dimmed { opacity: 0.25; pointer-events: none; }
+.card.crisis { background: var(--crisis-bg); border-color: var(--crisis-border); }
+.card.crisis .card-name { color: var(--crisis-text); }
+.card .card-type {
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700;
+  color: var(--text-dim); margin-bottom: 0.1rem;
+}
+.card.crisis .card-type { color: var(--crisis-text); font-weight: 900; }
+.card .card-name { font-family: var(--serif); font-size: 0.95rem; font-weight: 700; line-height: 1.25; color: var(--text-dark); }
+.card .card-effect { font-size: 0.8rem; line-height: 1.4; color: var(--text-dim); flex: 1; margin-top: 0.15rem; }
+.card.crisis .card-effect { color: #6a4a3a; }
+.card .card-cats { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: auto; padding-top: 0.3rem; }
+.cat-badge {
+  font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.4rem;
+  border-radius: 2px; color: #fff; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ===== MELD PICKER ===== */
+.cat-picker { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+.cat-btn {
+  font-family: var(--sans); font-size: 0.85rem; font-weight: 700;
+  padding: 0.55rem 1rem; border: 2px solid; border-radius: 2px;
+  cursor: pointer; transition: all 0.15s; background: transparent;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.cat-btn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
+.cat-btn:disabled { opacity: 0.2; cursor: default; }
+.cat-btn.active { color: #fff !important; }
+
+/* ===== MELD SUMMARY ===== */
+.meld-summary {
+  background: var(--cream); border: 1px solid var(--rule-dark);
+  border-top: 3px double var(--rule-dark);
+  padding: 0.7rem 1.4rem; text-align: center; font-size: 1.05rem;
+}
+.meld-summary .meld-total { font-family: var(--serif); font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
+
+/* ===== CONTROLS ===== */
+.controls-area {
+  width: 100%; max-width: var(--max-w); padding: 0.6rem 2rem 1rem; text-align: center;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--cream); border: 2px solid var(--rule-dark);
+  padding: 2rem 2.5rem; max-width: 560px; width: 92%; text-align: center;
+  box-shadow: 3px 3px 20px rgba(0,0,0,0.2);
+}
+.modal h2 { font-family: var(--serif); color: var(--text-dark); margin-bottom: 0.8rem; font-size: 1.4rem; }
+.modal p { margin-bottom: 1rem; color: var(--text); font-size: 1rem; line-height: 1.6; }
+.modal .option-btn {
+  display: block; width: 100%; text-align: left; padding: 0.9rem 1.2rem;
+  margin-bottom: 0.6rem; font-size: 1.05rem;
+  background: var(--bg); border: 1.5px solid var(--rule);
+  color: var(--text); cursor: pointer; font-family: var(--sans); transition: all 0.15s;
+  line-height: 1.5;
+}
+.modal .option-btn:hover { background: var(--bg2); border-color: var(--rule-dark); }
+.modal .option-btn .opt-desc { font-size: 0.82rem; color: var(--text-dim); display: block; margin-top: 0.2rem; }
+
+/* ===== GAME LOG ===== */
+.log-toggle { position: fixed; bottom: 1rem; right: 1rem; z-index: 50; }
+.log-panel {
+  position: fixed; bottom: 3.5rem; right: 1rem; width: 360px; max-height: 350px;
+  background: var(--cream); border: 1px solid var(--rule-dark);
+  overflow-y: auto; padding: 1rem; font-size: 0.82rem; z-index: 50;
+  color: var(--text-dim); line-height: 1.6;
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.12);
+}
+.log-panel.hidden { display: none; }
+.log-entry.turn-header { color: var(--text-dark); font-weight: 700; font-family: var(--serif); margin-top: 0.6rem; }
+
+/* ===== TUTORIAL ===== */
+.tutorial {
+  max-width: 800px; width: 95%; margin: 0 auto; padding: 2rem;
+  display: flex; flex-direction: column; align-items: center; min-height: 85vh; justify-content: center;
+}
+.tutorial h1 {
+  font-size: 3.2rem; letter-spacing: 0.18em; text-align: center; margin-bottom: 0.2rem;
+  color: var(--text-dark);
+}
+.tutorial .t-sub {
+  font-family: var(--serif); font-size: 1.15rem; font-style: italic; color: var(--text-dim);
+  margin-bottom: 2rem; text-align: center;
+}
+.tutorial .t-page { width: 100%; }
+.t-section {
+  background: var(--cream); border: 1px solid var(--rule);
+  padding: 2rem 2.2rem; margin-bottom: 1.2rem;
+}
+.t-section h2 {
+  font-family: var(--serif); color: var(--text-dark); font-size: 1.5rem; margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.t-section p { font-size: 1.05rem; line-height: 1.75; color: var(--text); margin-bottom: 0.7rem; }
+.t-section .t-highlight {
+  background: var(--bg); border: 1px solid var(--rule); border-left: 4px solid var(--rule-dark);
+  padding: 1rem 1.3rem; margin: 1rem 0; font-size: 1.05rem; text-align: center; line-height: 1.7;
+}
+.t-section .t-highlight b { color: var(--text-dark); }
+.t-section ul { padding-left: 1.3rem; margin: 0.6rem 0; }
+.t-section li { font-size: 1.02rem; line-height: 1.8; color: var(--text); margin-bottom: 0.4rem; }
+.t-section li b { color: var(--text-dark); }
+.t-cats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin: 1rem 0;
+}
+.t-cat {
+  text-align: center; padding: 0.7rem 0.4rem; background: var(--bg);
+  border: 1px solid var(--rule);
+}
+.t-cat .t-cat-icon { font-size: 1.8rem; }
+.t-cat .t-cat-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem; }
+.t-cat .t-cat-desc { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.15rem; }
+.t-nav { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; }
+.t-dots { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.2rem; }
+.t-dot {
+  width: 12px; height: 12px; border-radius: 50%; background: var(--rule); transition: background 0.2s;
+}
+.t-dot.active { background: var(--text-dark); }
+.t-steps {
+  display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0;
+}
+.t-step {
+  display: flex; gap: 1rem; align-items: flex-start; padding: 0.8rem 1rem;
+  background: var(--bg); border: 1px solid var(--rule);
+}
+.t-step-num {
+  font-family: var(--serif); font-size: 1.5rem; font-weight: 900; color: var(--text-dark);
+  min-width: 2rem; text-align: center;
+}
+.t-step-text { font-size: 1rem; line-height: 1.6; }
+.t-step-text b { color: var(--text-dark); }
+.t-step-text .t-detail { font-size: 0.88rem; color: var(--text-dim); display: block; margin-top: 0.2rem; }
+
+/* ===== TITLE SCREEN ===== */
+.title-screen {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 85vh; text-align: center; padding: 2.5rem;
+}
+.title-screen h1 {
+  font-size: 4.5rem; letter-spacing: 0.22em; margin-bottom: 0;
+  color: var(--text-dark);
+  border-top: 3px double var(--rule-dark);
+  padding-top: 0.5rem; line-height: 1.1;
+}
+.title-screen .sub {
+  display: block; font-size: 0.85rem; color: var(--text-dim); font-style: normal;
+  letter-spacing: 0.3em; text-transform: uppercase; margin-top: 0.5rem;
+  font-weight: 400; font-family: var(--sans);
+  border-top: 1px solid var(--rule);
+  border-bottom: 3px double var(--rule-dark);
+  padding: 0.35rem 0;
+}
+.title-screen .flavor {
+  max-width: 560px; font-size: 1.05rem; color: var(--text-dim); line-height: 1.85;
+  margin-top: 1.5rem; margin-bottom: 2rem;
+  font-family: var(--serif); font-style: italic;
+}
+.title-screen .dateline {
+  font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.25em; margin-top: 1rem; font-family: var(--sans); font-weight: 600;
+}
+.title-screen .credit { margin-top: 2rem; font-size: 0.8rem; color: var(--text-dim); font-style: italic; }
+
+/* ===== GAME OVER ===== */
+.game-over {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 75vh; text-align: center; padding: 2.5rem;
+}
+.game-over h2 {
+  font-family: var(--serif); font-size: 2.4rem; color: var(--text-dark); margin-bottom: 0.4rem;
+  border-bottom: 3px double var(--rule-dark); padding-bottom: 0.4rem;
+}
+.game-over .final-score { font-family: var(--serif); font-size: 5rem; font-weight: 900; color: var(--text-dark); margin: 0.5rem 0; }
+.game-over .score-formula { font-size: 1.1rem; color: var(--text-dim); margin-bottom: 1.5rem; line-height: 1.6; }
+.game-over .rating { font-size: 1.5rem; margin-bottom: 0.8rem; font-family: var(--serif); }
+.game-over .rating-flavor {
+  font-size: 1.05rem; color: var(--text-dim); max-width: 480px; line-height: 1.7; margin-bottom: 2rem;
+  font-family: var(--serif); font-style: italic;
+}
+.game-over .final-cats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  margin-bottom: 2rem; width: 100%; max-width: 500px;
+  border: 1px solid var(--rule);
+}
+.game-over .fc {
+  text-align: center; padding: 0.6rem;
+  border-left: 1px solid var(--rule);
+}
+.game-over .fc:nth-child(4n+1) { border-left: none; }
+.game-over .fc:nth-child(n+5) { border-top: 1px solid var(--rule); }
+.game-over .fc .fcl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+.game-over .fc .fcv { font-family: var(--serif); font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
+.game-over .fc.is-low .fcv { color: var(--red); }
+.game-over .fc.is-high .fcv { color: var(--green); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  html { font-size: 16px; }
+  .scoreboard { grid-template-columns: repeat(4, 1fr); }
+  .score-cell:nth-child(4n+1) { border-left: none; }
+  .score-cell:nth-child(5) { border-top: 1px solid var(--rule); }
+  .card { width: 150px; min-height: 175px; }
+  .t-cats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  html { font-size: 15px; }
+  .scoreboard { grid-template-columns: repeat(4, 1fr); }
+  .score-cell:nth-child(4n+1) { border-left: none; }
+  .score-cell:nth-child(5) { border-top: 1px solid var(--rule); }
+  .card { width: 130px; min-height: 155px; }
+  .tutorial h1 { font-size: 2.2rem; }
+  .title-screen h1 { font-size: 3rem; }
+  header { flex-direction: column; align-items: flex-start; }
+}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div class="log-toggle"><button class="btn btn-sm btn-outline" onclick="toggleLog()">Log</button></div>
+<div class="log-panel hidden" id="logPanel"></div>
+
+<div class="modal-overlay hidden" id="modal"></div>
+
+<script>
+// ==================== CONSTANTS ====================
+const CATS = ['IC','AR','FN','BK','NS','IF','PW','WF'];
+const CAT_FULL = {
+  IC:'Industry Codes', AR:'Agriculture', FN:'Finance', BK:'Banking',
+  NS:'National Spirit', IF:'Inflation', PW:'Public Works', WF:'Welfare'
+};
+const CAT_COLOR = {
+  IC:'var(--cat-IC)', AR:'var(--cat-AR)', FN:'var(--cat-FN)', BK:'var(--cat-BK)',
+  NS:'var(--cat-NS)', IF:'var(--cat-IF)', PW:'var(--cat-PW)', WF:'var(--cat-WF)'
+};
+const CAT_ICON = {
+  IC:'🏭', AR:'🌾', FN:'📈', BK:'🏦', NS:'🗽', IF:'💲', PW:'🏗️', WF:'🤝'
+};
+const CAT_HINT = {
+  IC:'Factory regulations', AR:'Farming & crops', FN:'Wall Street reform',
+  BK:'Bank stability', NS:'Public morale', IF:'Money supply', PW:'Roads & dams', WF:'Jobs & relief'
+};
+
+// Card data: [name, effectString]  ! prefix = crisis
+const CARD_DATA = [
+  ["Franklin Delano Roosevelt","A3|NS+2"],
+  ["Power of Government","M2"],
+  ["Louis McHenry Howe","D2|A2"],
+  ["Bold, Persistent Experimentation","D1&A2"],
+  ["Broad Programs","**+1"],
+  ["Social Welfare","NS+1|WF+1"],
+  ["Unemployment Relief","WF+1|A2"],
+  ["Restore Faith of the Nation","NS+1|D2"],
+  ["Restore Shattered Economy","*+1|D2"],
+  ["Federal Regulation","FN+1|BK+1|IF+1"],
+  ["!Outbursts of Violence","SL"],
+  ["!Protests Against Foreclosures","SR"],
+  ["Brain Trust","D2|A2"],
+  ["Raymond Moley","D3"],
+  ["Rexford Guy Tugwell","AR+2"],
+  ["Adolf Berle Jr.","FN+1|BK+1"],
+  ["!Bank Closures","BK-1"],
+  ["!Fear Itself","NS-1"],
+  ["First 100 Days","D2&A1|NS+1"],
+  ["President's Speeches","NS+1&A1"],
+  ["Rehabilitate the Banks","BK+2"],
+  ["Issue Edicts","*+1|NS+2"],
+  ["Fireside Chats","NS+1|A2"],
+  ["New Deal","D1&A1|NS+1"],
+  ["Propose Bills","D3&X1|PW+1"],
+  ["Sign Bills into Law","A2|IC+1"],
+  ["Glass-Steagall Act","BK+1|FN+1"],
+  ["Federal Deposit Insurance","BK+2"],
+  ["Repeal Prohibition","NS+2"],
+  ["Relief Recovery Reform","**+1"],
+  ["Ratify Amendment","A2|NS+2"],
+  ["Century of Progress","D3|NS+1"],
+  ["Far Reaching Legislation","M2"],
+  ["!Farm Crisis","AR-1"],
+  ["Stabilize Crop Prices","AR+1|IF+1"],
+  ["Subsidize Scarcity","AR+1|IF+1"],
+  ["Henry Agard Wallace","AR+2"],
+  ["Agricultural Adjustment Act","AR+1|A2"],
+  ["Farm Subsidies","AR+1|D2"],
+  ["Harold L. Ickes","PW+2"],
+  ["Farm Bill","AR+1|A2"],
+  ["Go Off the Gold Standard","IF+2"],
+  ["Stunning Press Release","NS+1&A1"],
+  ["Inflationary Proposal","IF+1|D2"],
+  ["Gold Buying","IF+1|A2"],
+  ["Silver Purchase Act","IF+1&A1"],
+  ["Controlled Inflation","IF+2"],
+  ["Fiscal Policy","IF+1|BK+1"],
+  ["Gold Reserve Act","IF+1|BK+1"],
+  ["Emergency Banking Relief Act","IF+1|BK+1"],
+  ["National Industrial Recovery Act","IC+1&A1"],
+  ["Frances Perkins","IC+2"],
+  ["Industry-Wide Agreements","IC+1|A2"],
+  ["Antitrust Law Exemptions","IC+1|FN+1"],
+  ["Collective Bargaining","IC+1|D2"],
+  ["Worker's Rights","IC+1|WF+1"],
+  ["Minimum Wages","IC+1|WF+1"],
+  ["Public Works Administration","PW+1&D1"],
+  ["National Recovery Administration","IC+1|WF+1"],
+  ["Hugh Johnson","IC+2"],
+  ["We Do Our Part","IC+1|NS+1"],
+  ["NRA Codes","IC+1&D1"],
+  ["Maximum Hours","IC+1|WF+1"],
+  ["Outlaw Child Labor","IC+1|WF+1"],
+  ["Highways & Subways","PW+1|D2"],
+  ["Dams & Power Plants","PW+1|A2"],
+  ["Hospitals & Housing Projects","PW+1|WF+1"],
+  ["Schools & Playgrounds","PW+1|NS+1"],
+  ["Reconstruction Finance Corp.","BK+1|D2"],
+  ["Jesse Jones","BK+2"],
+  ["RFC Investments","PW+1|D2"],
+  ["Securities Act","FN+2"],
+  ["Require Financial Statements","FN+1"],
+  ["Deep Rooted Reform","FN+1|A2"],
+  ["Securities & Exchange Commission","FN+1&A1"],
+  ["!Wall Street Opposition","FN-1"],
+  ["Economic Legislation","FN+1|D2"],
+  ["Sanction Unionization","IC+1"],
+  ["!Poverty","WF-1"],
+  ["!Run on Banks","BK-1"],
+  ["!Unemployment","WF-1"],
+  ["!Lost Foreign Trade","DR"],
+  ["!Stock Market Crash","FN-1"],
+  ["Sense of Purpose","NS+1|D2"],
+  ["Federal Art Project","NS+1|WF+1"],
+  ["Bread Lines","WF+1"],
+  ["!Homelessness","WF-1"],
+  ["Welfare State","WF+1|D2"],
+  ["!Dust Bowl","WF-1"],
+  ["!Labor Disputes","IC-1"],
+  ["!Political Challenges","NS-1"],
+  ["!Riots","NS-1"],
+  ["Harry Hopkins","WF+2"],
+  ["FERA Program","WF+1|D2"],
+  ["Direct Relief","WF+1|A2"],
+  ["Civil Works Administration","WF+1|PW+1"],
+  ["Works Progress Administration","WF+1|PW+1|AR+1"],
+  ["Canker, Moths & Weevil Control","WF+1|AR+1"],
+  ["Federal Theatre","PW+1|NS+1"],
+  ["Federal Writers Project","WF+1|NS+1"],
+  ["Federal Music Project","WF+1|NS+1"],
+  ["Black Cabinet","WF+1|NS+1"],
+  ["National Youth Administration","WF+1|NS+1"],
+  ["Civilian Conservation Corps","WF+1|NS+1|AR+1"],
+  ["Soil Conservation Service","AR+1&D1"],
+  ["Tennessee Valley Authority","AR+1|PW+1"],
+  ["Rural Electrification Admin.","PW+1&A1"],
+  ["Public Utility Holding Co. Act","FN+1|D2"],
+  ["Brandeis Group","FN+1|D2"],
+  ["Second Hundred Days","D2&A2|FN+1"],
+  ["Revenue Act","FN+1|A2"],
+  ["Estate, Gift & Capital Taxes","FN+1&A1"],
+  ["Excess Profits Tax & Surtaxes","FN+1"],
+  ["National Labor Relations Act","IC+1&D1"],
+  ["Social Security Act","WF+2"],
+  ["!Unfair Labor Practices","IC-1"],
+  ["!Opposition by Big Business","NA"],
+  ["US Housing Authority","WF+1|FN+1|PW+1"],
+  ["Home Owners Loan Corp.","WF+1|FN+1|PW+1"],
+  ["Federal Housing Admin.","WF+1|FN+1|PW+1"],
+  ["Resettlement Administration","WF+1|AR+1"],
+  ["Unemployment Insurance","WF+1|NS+1"],
+  ["Public Health Services","WF+1|NS+1"],
+  ["!Eastern Floods","AR-1"],
+  ["Shelter Belt","AR+1"],
+  ["John Collier","WF+2"],
+  ["!Supreme Court Rulings","NM"],
+  ["!Recession","IF-1"],
+  ["Anti-Trust Policy","FN+1|D2"],
+];
+
+// ==================== CARD PARSER ====================
+function parseEffect(t) {
+  t = t.trim();
+  if (t === 'M2') return {type:'meld_bonus', value:2};
+  if (/^D\d+$/.test(t)) return {type:'draw', value:+t.slice(1)};
+  if (/^A\d+$/.test(t)) return {type:'actions', value:+t.slice(1)};
+  if (/^X\d+$/.test(t)) return {type:'force_discard', value:+t.slice(1)};
+  if (t === '**+1') return {type:'any_two', value:1};
+  if (/^\*\+\d+$/.test(t)) return {type:'any_one', value:+t.slice(2)};
+  const m = t.match(/^([A-Z]{2})([+-]\d+)$/);
+  if (m) return {type:'score', cat:m[1], value:+m[2]};
+  return {type:'unknown', raw:t};
+}
+
+function parseCrisis(s) {
+  if (s==='SL') return [{type:'skip_legislation'}];
+  if (s==='SR') return [{type:'skip_reform'}];
+  if (s==='DR') return [{type:'discard_random'}];
+  if (s==='NA') return [{type:'negate_actions'}];
+  if (s==='NM') return [{type:'negate_meld'}];
+  const m = s.match(/^([A-Z]{2})(-\d+)$/);
+  if (m) return [{type:'score', cat:m[1], value:+m[2]}];
+  return [];
+}
+
+function buildCards(data) {
+  return data.map(([raw, eff], i) => {
+    const crisis = raw.startsWith('!');
+    const name = crisis ? raw.slice(1) : raw;
+    if (crisis) return {id:i, name, crisis:true, effects:parseCrisis(eff), options:null, meld:{}, effectStr:eff};
+    const options = eff.split('|').map(o => o.split('&').map(parseEffect));
+    const meld = {};
+    for (const opt of options) for (const e of opt) {
+      if (e.type==='score' && e.value>0) { if (!meld[e.cat]||e.value>meld[e.cat]) meld[e.cat]=e.value; }
+      if (e.type==='meld_bonus') meld._wild = e.value;
+    }
+    return {id:i, name, crisis:false, options, meld, effectStr:eff};
+  });
+}
+
+// ==================== DESCRIBE EFFECTS ====================
+function descEffect(e) {
+  switch(e.type) {
+    case 'score': {
+      const full = CAT_FULL[e.cat]||e.cat;
+      return e.value>0 ? `${full} +${e.value}` : `${full} ${e.value}`;
+    }
+    case 'draw': return `Draw ${e.value} card${e.value>1?'s':''}`;
+    case 'actions': return `+${e.value} Action${e.value>1?'s':''}`;
+    case 'any_one': return `Any category +${e.value}`;
+    case 'any_two': return `Choose 2 categories, each +${e.value}`;
+    case 'meld_bonus': return `Add +${e.value} to any Meld`;
+    case 'force_discard': return `then discard ${e.value}`;
+    case 'skip_legislation': return 'Skip your Legislation step this turn';
+    case 'skip_reform': return 'Skip your Reform step this turn';
+    case 'discard_random': return 'Lose 1 random card from your hand';
+    case 'negate_actions': return 'Lose all your Actions';
+    case 'negate_meld': return 'Undo your last Meld this game';
+    default: return '?';
+  }
+}
+function descOption(effects) { return effects.map(descEffect).join(' & '); }
+function descCardShort(card) {
+  if (card.crisis) return card.effects.map(descEffect).join(', ');
+  return card.options.map(o => o.map(e => {
+    switch(e.type) {
+      case 'score': return `${e.cat} ${e.value>0?'+':''}${e.value}`;
+      case 'draw': return `Draw ${e.value}`;
+      case 'actions': return `+${e.value} Act.`;
+      case 'any_one': return `Any +${e.value}`;
+      case 'any_two': return `Any 2 +${e.value}`;
+      case 'meld_bonus': return `Meld +${e.value}`;
+      case 'force_discard': return `Disc. ${e.value}`;
+      default: return descEffect(e);
+    }
+  }).join(' & ')).join('  ·  ');
+}
+
+// ==================== GAME STATE ====================
+let G = {};
+
+function newGame() {
+  G = {
+    deck: shuffle([...buildCards(CARD_DATA)]),
+    hand: [], discard: [],
+    scores: Object.fromEntries(CATS.map(c=>[c,0])),
+    turn: 0, phase: 'title',
+    actions: 0, log: [],
+    skipLeg: false, skipRef: false, lastMeld: null,
+    selected: new Set(), meldCat: null,
+    pendingForceDiscard: 0, message: '', crisisMsg: false,
+    tutPage: 0,
+  };
+  render();
+}
+
+function shuffle(a) {
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function drawCards(n) {
+  const drawn = [];
+  for (let i=0;i<n;i++) {
+    if (!G.deck.length) {
+      if (!G.discard.length) break;
+      G.deck = shuffle([...G.discard]); G.discard = []; addLog('Shuffled discard back into the deck.');
+    }
+    drawn.push(G.deck.pop());
+  }
+  return drawn;
+}
+
+function addLog(t) { G.log.push(t); }
+function setMsg(t, crisis=false) { G.message=t; G.crisisMsg=crisis; }
+
+// ==================== PHASE LOGIC ====================
+function startTurn() {
+  G.turn++;
+  if (G.turn > 15) { endGame(); return; }
+  G.skipLeg=false; G.skipRef=false;
+  G.selected.clear(); G.meldCat=null;
+  addLog(`── Turn ${G.turn} ──`);
+  proposalPhase();
+}
+
+function proposalPhase() {
+  G.phase = 'proposal';
+  const need = Math.max(0, 9-G.hand.length);
+  if (need>0) { G.hand.push(...drawCards(need)); addLog(`Drew ${need} cards (hand: ${G.hand.length})`); }
+  setMsg(`<b>Turn ${G.turn} of 15</b> — You drew cards. Your hand is full.`);
+  setTimeout(()=>{ depressionPhase(); }, 500);
+  render();
+}
+
+function depressionPhase() {
+  G.phase = 'depression'; G.selected.clear();
+  const crisis = G.hand.filter(c=>c.crisis);
+  if (!crisis.length) {
+    addLog('No crisis cards.');
+    setMsg('Good news — no crises this turn! Moving to Legislation...');
+    setTimeout(()=>{ legislationPhase(); }, 600);
+    render(); return;
+  }
+  setMsg(`⚠️ <b>Crisis!</b> You have <b>${crisis.length}</b> crisis card${crisis.length>1?'s':''}. You must play one — click a <span style="color:var(--crisis-text)">red card</span> to resolve it.`, true);
+  render();
+}
+
+function playCrisis(idx) {
+  const card = G.hand[idx];
+  if (!card||!card.crisis) return;
+  G.hand.splice(idx,1); G.discard.push(card);
+  addLog(`CRISIS: ${card.name}`);
+  for (const e of card.effects) {
+    switch(e.type) {
+      case 'score': G.scores[e.cat]+=e.value; addLog(`  ${CAT_FULL[e.cat]} ${e.value}`); flashScore(e.cat,e.value); break;
+      case 'skip_legislation': G.skipLeg=true; addLog('  Legislation skipped!'); break;
+      case 'skip_reform': G.skipRef=true; addLog('  Reform skipped!'); break;
+      case 'discard_random':
+        if (G.hand.length) { const r=Math.floor(Math.random()*G.hand.length); const c=G.hand.splice(r,1)[0]; G.discard.push(c); addLog(`  Lost card: ${c.name}`); }
+        break;
+      case 'negate_actions': { const l=G.actions; G.actions=0; addLog(`  Lost ${l} actions`); break; }
+      case 'negate_meld':
+        if (G.lastMeld) { G.scores[G.lastMeld.cat]-=G.lastMeld.value; addLog(`  Undid meld: ${CAT_FULL[G.lastMeld.cat]} -${G.lastMeld.value}`); flashScore(G.lastMeld.cat,-G.lastMeld.value); G.lastMeld=null; }
+        else addLog('  No meld to undo.');
+        break;
+    }
+  }
+  setMsg(`Crisis resolved: <b>${card.name}</b> — ${card.effects.map(descEffect).join(', ')}`, true);
+  setTimeout(()=>{ legislationPhase(); }, 900);
+  render();
+}
+
+function legislationPhase() {
+  if (G.skipLeg) {
+    addLog('Legislation skipped (crisis).'); setMsg('Legislation <b>skipped</b> by crisis! Moving to Reform...', true);
+    setTimeout(()=>{ reformPhase(); }, 700); render(); return;
+  }
+  G.phase='legislation'; G.selected.clear();
+  setMsg('⚖️ <b>Legislation</b> — Click a card to play it for its effect.');
+  render();
+}
+
+function playLegislation(idx) {
+  const card = G.hand[idx];
+  if (!card||card.crisis) return;
+  if (card.options.length===1 && !optNeedsChoice(card.options[0])) {
+    G.hand.splice(idx,1); G.discard.push(card);
+    addLog(`Played: ${card.name}`);
+    resolveEffects(card.options[0], ()=>afterLegPlay());
+    return;
+  }
+  showOptionModal(card, idx);
+}
+
+function optNeedsChoice(effs) { return effs.some(e=>e.type==='any_one'||e.type==='any_two'); }
+
+function showOptionModal(card, idx) {
+  const m = document.getElementById('modal');
+  let h = `<div class="modal"><h2>${card.name}</h2><p>This card has multiple effects. Pick the one you want:</p>`;
+  card.options.forEach((opt,i) => {
+    h += `<button class="option-btn" onclick="chooseOption(${idx},${i})">
+      ${descOption(opt)}
+      <span class="opt-desc">${optHint(opt)}</span>
+    </button>`;
+  });
+  h += `<div class="btn-group" style="margin-top:0.8rem"><button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button></div></div>`;
+  m.innerHTML = h; m.classList.remove('hidden');
+}
+
+function optHint(effects) {
+  const types = effects.map(e=>e.type);
+  if (types.includes('score')) { const s=effects.find(e=>e.type==='score'); return `Boosts your ${CAT_FULL[s.cat]} score`; }
+  if (types.includes('draw')) return 'Get more cards in your hand';
+  if (types.includes('actions')) return 'Actions let you play extra cards later';
+  if (types.includes('any_one')) return "You'll pick which category to boost";
+  if (types.includes('any_two')) return "You'll pick 2 categories to boost";
+  if (types.includes('meld_bonus')) return 'Use with a Meld for a bigger bonus';
+  return '';
+}
+
+function chooseOption(idx, optIdx) {
+  closeModal();
+  const card = G.hand[idx]; if (!card) return;
+  const effects = card.options[optIdx];
+  G.hand.splice(idx,1); G.discard.push(card);
+  addLog(`Played: ${card.name} → ${descOption(effects)}`);
+  resolveEffects(effects, ()=>afterLegPlay());
+}
+
+function resolveEffects(effects, cb) {
+  let i=0;
+  function next() {
+    if (i>=effects.length) { render(); cb(); return; }
+    const e=effects[i++];
+    switch(e.type) {
+      case 'score': G.scores[e.cat]+=e.value; flashScore(e.cat,e.value); next(); break;
+      case 'draw': G.hand.push(...drawCards(e.value)); addLog(`  Drew ${e.value} card${e.value>1?'s':''}`); next(); break;
+      case 'actions': G.actions+=e.value; addLog(`  +${e.value} actions (total: ${G.actions})`); next(); break;
+      case 'meld_bonus': next(); break;
+      case 'force_discard': showForceDiscardModal(e.value, next); return;
+      case 'any_one': showCatPickerModal(1,e.value,next); return;
+      case 'any_two': showCatPickerModal(2,e.value,next); return;
+      default: next();
+    }
+  }
+  next();
+}
+
+function showForceDiscardModal(count, cb) {
+  G._fdCount=count; G._fdCb=cb;
+  G.phase='force_discard'; G.selected.clear();
+  setMsg(`You drew extra cards — select <b>${count}</b> card${count>1?'s':''} to discard.`);
+  render();
+}
+function confirmForceDiscard() {
+  if (G.selected.size!==G._fdCount) return;
+  const indices=[...G.selected].sort((a,b)=>b-a);
+  const names=indices.map(i=>G.hand[i].name);
+  for (const i of indices) G.discard.push(G.hand.splice(i,1)[0]);
+  addLog(`  Discarded: ${names.join(', ')}`);
+  G.selected.clear();
+  const cb=G._fdCb; G._fdCb=null; G._fdCount=0;
+  render(); cb();
+}
+
+function showCatPickerModal(count, val, cb) {
+  G._cpCount=count; G._cpVal=val; G._cpPicked=[]; G._cpCb=cb;
+  renderCatPicker();
+}
+function renderCatPicker() {
+  const m=document.getElementById('modal');
+  const rem=G._cpCount-G._cpPicked.length;
+  let h=`<div class="modal"><h2>Choose ${G._cpCount===1?'a Category':`${G._cpCount} Categories`}</h2>`;
+  h+=`<p>Each chosen category gets <b>+${G._cpVal}</b> to its score. ${rem>0?`Pick ${rem} more.`:'All chosen!'}</p>`;
+  h+=`<div class="cat-picker">`;
+  CATS.forEach(cat=>{
+    const picked=G._cpPicked.includes(cat);
+    const dis=!picked&&rem<=0;
+    h+=`<button class="cat-btn${picked?' active':''}" style="border-color:${CAT_COLOR[cat]};color:${CAT_COLOR[cat]};${picked?'background:'+CAT_COLOR[cat]:''}" ${dis?'disabled':''} onclick="pickCat('${cat}')">${CAT_ICON[cat]}<br>${cat}<br><span style="font-size:0.55rem;opacity:0.7">${CAT_FULL[cat]}: ${G.scores[cat]}</span></button>`;
+  });
+  h+=`</div>`;
+  if (G._cpPicked.length===G._cpCount) h+=`<div class="btn-group" style="margin-top:1rem"><button class="btn btn-gold" onclick="confirmCatPick()">Confirm</button></div>`;
+  h+=`</div>`; m.innerHTML=h; m.classList.remove('hidden');
+}
+function pickCat(cat) {
+  const i=G._cpPicked.indexOf(cat);
+  if (i>=0) G._cpPicked.splice(i,1);
+  else if (G._cpPicked.length<G._cpCount) G._cpPicked.push(cat);
+  renderCatPicker();
+}
+function confirmCatPick() {
+  closeModal();
+  for (const cat of G._cpPicked) { G.scores[cat]+=G._cpVal; flashScore(cat,G._cpVal); addLog(`  ${CAT_FULL[cat]} +${G._cpVal}`); }
+  const cb=G._cpCb; G._cpCb=null; render(); cb();
+}
+
+function afterLegPlay() {
+  if (G.actions>0) {
+    setMsg(`Card played! You have <b>${G.actions} Action${G.actions>1?'s':''}</b> saved up. Spend one to play another card, or save them for extra Melds in Reform.`);
+    G.phase='legislation_ask'; render();
+  } else { reformPhase(); }
+}
+
+function spendActionLeg() {
+  G.actions--; addLog(`Spent 1 action (${G.actions} left)`);
+  G.phase='legislation'; G.selected.clear();
+  setMsg('⚖️ <b>Extra Legislation play!</b> Click another card, or <b>Pass</b>.');
+  render();
+}
+
+function reformPhase() {
+  if (G.skipRef) {
+    addLog('Reform skipped (crisis).'); setMsg('Reform <b>skipped</b> by crisis! Moving to discard...', true);
+    setTimeout(()=>politicsPhase(), 700); render(); return;
+  }
+  G.phase='reform'; G.selected.clear(); G.meldCat=null;
+  setMsg('🔧 <b>Reform</b> — Pick a category below, then select matching cards to build a Meld.');
+  render();
+}
+
+function selectMeldCat(cat) {
+  G.meldCat=cat; G.selected.clear();
+  setMsg(`Building a <b>${CAT_FULL[cat]}</b> meld — click the cards you want to include, then press <b>Play Meld</b>.`);
+  render();
+}
+function cancelMeld() { G.meldCat=null; G.selected.clear(); setMsg('🔧 <b>Reform</b> — Pick a category to meld, or <b>Pass</b>.'); render(); }
+function toggleMeldCard(idx) { if (G.selected.has(idx)) G.selected.delete(idx); else G.selected.add(idx); render(); }
+
+function getMeldValue() {
+  if (!G.meldCat) return 0;
+  let t=0;
+  for (const i of G.selected) { const c=G.hand[i]; if (c.meld._wild) t+=c.meld._wild; else if(c.meld[G.meldCat]) t+=c.meld[G.meldCat]; }
+  return t;
+}
+
+function playMeld() {
+  const cat=G.meldCat, val=getMeldValue();
+  if (val<=0||!G.selected.size) return;
+  const indices=[...G.selected].sort((a,b)=>b-a);
+  const names=indices.map(i=>G.hand[i].name);
+  for (const i of indices) G.discard.push(G.hand.splice(i,1)[0]);
+  G.scores[cat]+=val; G.lastMeld={cat,value:val}; flashScore(cat,val);
+  addLog(`Meld (${CAT_FULL[cat]} +${val}): ${names.join(', ')}`);
+  G.selected.clear(); G.meldCat=null;
+  setMsg(`Meld played! <b>${CAT_FULL[cat]} +${val}</b> 🎉`);
+  afterReformPlay();
+}
+
+function afterReformPlay() {
+  if (G.actions>0) {
+    G.phase='reform_ask';
+    setMsg(`Meld played! You have <b>${G.actions} Action${G.actions>1?'s':''}</b>. Spend one for another meld?`);
+    render();
+  } else { setTimeout(()=>politicsPhase(), 500); render(); }
+}
+
+function spendActionRef() {
+  G.actions--; addLog(`Spent 1 action (${G.actions} left)`);
+  reformPhase();
+}
+
+function politicsPhase() {
+  if (!G.hand.length) {
+    addLog('No cards to discard.'); setMsg('Hand empty — moving to next turn.');
+    setTimeout(()=>startTurn(), 500); render(); return;
+  }
+  G.phase='politics'; G.selected.clear();
+  setMsg('🗑️ <b>Clean Up</b> — Select <b>1 to 5 cards</b> to discard from your hand, then confirm.');
+  render();
+}
+
+function toggleDiscardCard(idx) {
+  const max = G.phase==='force_discard' ? (G._fdCount||1) : 5;
+  if (G.selected.has(idx)) G.selected.delete(idx);
+  else if (G.selected.size<max) G.selected.add(idx);
+  render();
+}
+
+function confirmDiscard() {
+  if (G.selected.size<1||G.selected.size>5) return;
+  const indices=[...G.selected].sort((a,b)=>b-a);
+  const names=indices.map(i=>G.hand[i].name);
+  for (const i of indices) G.discard.push(G.hand.splice(i,1)[0]);
+  addLog(`Discarded ${names.length}: ${names.join(', ')}`);
+  G.selected.clear();
+  setMsg(`Discarded ${names.length} card${names.length>1?'s':''}. Turn ${G.turn} complete!`);
+  render();
+  setTimeout(()=>startTurn(), 700);
+}
+
+function endGame() {
+  G.phase='gameover';
+  const vals=CATS.map(c=>G.scores[c]);
+  G.finalMin=Math.min(...vals); G.finalMax=Math.max(...vals);
+  G.finalScore=G.finalMin*G.finalMax;
+  G.finalMinCat=CATS.find(c=>G.scores[c]===G.finalMin);
+  G.finalMaxCat=CATS.find(c=>G.scores[c]===G.finalMax);
+  addLog('=== GAME OVER ===');
+  addLog(`Final: ${G.finalMin} × ${G.finalMax} = ${G.finalScore}`);
+  render();
+}
+
+function getRating(s) {
+  if (s<=0) return ['💀 Hooverville','The Depression deepened under your watch. Millions remain without hope. Perhaps a different approach is needed.'];
+  if (s<=15) return ['📉 Tough Times','Some progress, but the recovery is painfully slow. Too many Americans are still suffering.'];
+  if (s<=35) return ['⚖️ Slow Recovery','The nation is healing, but unevenly. Some sectors recovered while others were neglected.'];
+  if (s<=60) return ['🏛️ Steady Progress',"You've made real headway. The New Deal programs are working, and Americans can see a future again."];
+  if (s<=100) return ['🇺🇸 The New Deal Works!',"Strong, balanced recovery across the board. History will remember this as a turning point for America."];
+  return ['⭐ A New Era!','An extraordinary achievement. You balanced every sector of the economy and led America into a new age of prosperity.'];
+}
+
+function passPhase() {
+  if (G.phase==='legislation'||G.phase==='legislation_ask') { addLog('Passed Legislation.'); reformPhase(); }
+  else if (G.phase==='reform'||G.phase==='reform_ask') { addLog('Passed Reform.'); politicsPhase(); }
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+// ==================== SCORE FLASH ====================
+function flashScore(cat, value) {
+  setTimeout(()=>{
+    const el=document.querySelector(`.score-cell[data-cat="${cat}"]`);
+    if (!el) return;
+    el.classList.add(value>0?'flash-up':'flash-down');
+    const pop=document.createElement('div');
+    pop.className='score-pop'; pop.style.color=value>0?'var(--green)':'var(--red)';
+    pop.textContent=(value>0?'+':'')+value; el.appendChild(pop);
+    setTimeout(()=>{ el.classList.remove('flash-up','flash-down'); pop.remove(); },1200);
+  },50);
+}
+
+// ==================== TUTORIAL ====================
+const TUTORIAL_PAGES = [
+  ()=>`
+    <div class="t-section">
+      <h2>🇺🇸 Welcome, Mr. President</h2>
+      <p>The year is <b>1932</b>. America is in the grip of the <b>Great Depression</b> — the worst economic crisis in the nation's history. Banks are failing, factories are closing, and millions are out of work.</p>
+      <p>You are <b>Franklin Delano Roosevelt</b>, the newly elected President. Over the next 15 turns, you'll pass legislation, launch programs, and fight crises to pull the country back from the brink.</p>
+      <div class="t-highlight">This game is based on the real programs, people, and legislation of Roosevelt's <b>New Deal</b> (1933–1937).</div>
+    </div>`,
+  ()=>`
+    <div class="t-section">
+      <h2>📊 Your 8 Recovery Goals</h2>
+      <p>You're trying to improve <b>8 areas</b> of the American economy. Each starts at zero. Your job is to raise them all.</p>
+      <div class="t-cats-grid">
+        ${CATS.map(c=>`<div class="t-cat"><div class="t-cat-icon">${CAT_ICON[c]}</div><div class="t-cat-label" style="color:${CAT_COLOR[c]}">${c}</div><div class="t-cat-desc">${CAT_HINT[c]}</div></div>`).join('')}
+      </div>
+      <div class="t-highlight">
+        ⚠️ <b>Key rule:</b> Your final score is your <b>lowest</b> category × your <b>highest</b> category.<br>
+        One weak area drags your whole score down! <b>Balance is everything.</b>
+      </div>
+    </div>`,
+  ()=>`
+    <div class="t-section">
+      <h2>🔄 How a Turn Works</h2>
+      <p>Each turn has <b>5 simple steps</b>. Don't worry — the game guides you through each one!</p>
+      <div class="t-steps">
+        <div class="t-step"><div class="t-step-num">1</div><div class="t-step-text"><b>Draw Cards</b><span class="t-detail">Your hand fills up to 9 cards. This happens automatically.</span></div></div>
+        <div class="t-step"><div class="t-step-num">2</div><div class="t-step-text"><b>Handle Crises</b><span class="t-detail">If you have any red "Crisis" cards, you must play one. These are bad events — pick the least harmful one.</span></div></div>
+        <div class="t-step"><div class="t-step-num">3</div><div class="t-step-text"><b>Pass Legislation</b><span class="t-detail">Play one card from your hand to activate its effect (boost a score, draw more cards, or gain Actions). Or skip this step.</span></div></div>
+        <div class="t-step"><div class="t-step-num">4</div><div class="t-step-text"><b>Reform (Build a Meld)</b><span class="t-detail">Group cards that share a category and play them together for a combined bonus. This is how you score big! Or skip this step.</span></div></div>
+        <div class="t-step"><div class="t-step-num">5</div><div class="t-step-text"><b>Discard</b><span class="t-detail">Throw away 1–5 cards you don't want. Dump crisis cards when you can!</span></div></div>
+      </div>
+    </div>`,
+  ()=>`
+    <div class="t-section">
+      <h2>🃏 Cards & Melds</h2>
+      <p><b>Most cards</b> show options separated by a dot ( · ). When you play one in Legislation, you'll <b>pick which effect</b> you want.</p>
+      <p><b>Melds</b> are the key to big scores! In the Reform step, you choose a category (like Welfare), then play <b>all your cards that boost Welfare</b> at once. Their bonuses add up!</p>
+      <div class="t-highlight">
+        <b>Example:</b> You have 3 cards that each give Welfare +1.<br>
+        Play them as a meld → <b>Welfare +3</b> in one move!
+      </div>
+      <p><b>Actions</b> are a bonus resource. Some cards give you Actions, which you can spend later to play <b>extra</b> cards in Legislation or extra Melds in Reform.</p>
+    </div>`,
+  ()=>`
+    <div class="t-section">
+      <h2>🎯 Tips for Success</h2>
+      <ul>
+        <li><b>Balance your scores.</b> Lowest × Highest means a zero in any category gives you a score of zero. Spread the love!</li>
+        <li><b>Save cards for melds.</b> Playing 3 cards together for +3 is better than playing them separately across 3 turns.</li>
+        <li><b>Discard crisis cards</b> in the cleanup step when you can — get them out of your hand before you're forced to play them.</li>
+        <li><b>Actions are powerful.</b> Cards that give Actions let you play more cards in a single turn.</li>
+        <li>Don't panic! Even bad turns are historically accurate. 😄</li>
+      </ul>
+      <div class="t-highlight">
+        <b>Ready?</b> The game will guide you through each step. Look for the blue help box below the scores — it explains what to do.
+      </div>
+    </div>`,
+];
+
+function renderTutorial(app) {
+  const page = G.tutPage;
+  const total = TUTORIAL_PAGES.length;
+  let dots = '<div class="t-dots">';
+  for (let i=0;i<total;i++) dots+=`<div class="t-dot${i===page?' active':''}"></div>`;
+  dots+='</div>';
+
+  const isLast = page===total-1;
+  const isFirst = page===0;
+  let nav = '<div class="t-nav">';
+  if (!isFirst) nav+=`<button class="btn btn-outline" onclick="tutPrev()">← Back</button>`;
+  if (!isLast) nav+=`<button class="btn btn-gold btn-lg" onclick="tutNext()">Next →</button>`;
+  else nav+=`<button class="btn btn-gold btn-lg" onclick="beginPlay()">🎮 Start Playing!</button>`;
+  nav+='</div>';
+
+  app.innerHTML = `<div class="tutorial">
+    <h1 style="font-size:2.2rem">THE NEW DEAL</h1>
+    <div class="t-sub">How to Play</div>
+    ${dots}
+    <div class="t-page">${TUTORIAL_PAGES[page]()}</div>
+    ${nav}
+    <div style="margin-top:1rem"><button class="btn btn-outline btn-sm" onclick="beginPlay()">Skip tutorial →</button></div>
+  </div>`;
+}
+
+function tutNext() { if (G.tutPage<TUTORIAL_PAGES.length-1) { G.tutPage++; render(); } }
+function tutPrev() { if (G.tutPage>0) { G.tutPage--; render(); } }
+function beginPlay() { G.phase='playing'; startTurn(); }
+function showTutorial() { G.phase='tutorial'; G.tutPage=0; render(); }
+
+// ==================== PHASE HELP TEXT ====================
+function getPhaseHelp() {
+  switch(G.phase) {
+    case 'depression': return {
+      title: '💡 What to do', text: `You have <b>crisis cards</b> (shown in red). These represent bad events during the Depression. You <b>must</b> play one — click on the red card that hurts the least. After it resolves, you'll move to Legislation.`,
+      tip: 'Strategy: In the Discard step later, you can throw away crisis cards to avoid them next turn.'
+    };
+    case 'legislation': return {
+      title: '💡 What to do', text: `Click any <b>white card</b> to play it. If a card shows options separated by " · ", you'll get to <b>choose which effect</b> you want. Effects include boosting category scores, drawing more cards, and earning Actions.`,
+      tip: 'You can also press Pass to skip this step and save your cards for a Meld instead.'
+    };
+    case 'legislation_ask': return {
+      title: '💡 Actions available!', text: `<b>Actions</b> let you play extra cards! You can spend 1 Action now to play another card in Legislation, or save your Actions for extra Melds in the Reform step.`,
+      tip: 'Actions carry over between turns, so there\'s no rush to spend them.'
+    };
+    case 'reform': return G.meldCat ? {
+      title: `💡 Building a ${CAT_FULL[G.meldCat]} meld`, text: `Click the <b>highlighted cards</b> to add them to your meld. Each card's bonus for ${CAT_FULL[G.meldCat]} will be added together. Cards marked <span class="cat-badge" style="background:var(--gold);font-size:0.55rem">WILD</span> add +2 to any meld.`,
+      tip: `More cards = bigger bonus! When you're ready, press "Play Meld".`
+    } : {
+      title: '💡 What to do', text: `A <b>Meld</b> is a group of cards that all boost the <b>same category</b>. Pick a category from the colored buttons above, then select which cards to include. Their bonuses add up!`,
+      tip: 'This is the main way to score big. Save up matching cards and play them together!'
+    };
+    case 'reform_ask': return {
+      title: '💡 Play another meld?', text: `You still have <b>Actions</b> available. You can spend one to build another meld for a different category, or press Pass to move on.`,
+      tip: 'If you have cards for multiple categories, now is a great time to use them.'
+    };
+    case 'force_discard': return {
+      title: '💡 Discard required', text: `You drew extra cards and must discard <b>${G._fdCount||1}</b>. Click the card${(G._fdCount||1)>1?'s':''} you want to get rid of, then confirm.`,
+    };
+    case 'politics': return {
+      title: '💡 What to do', text: `Click <b>1 to 5 cards</b> to select them for discard (they'll glow when selected). Then press <b>Confirm</b>. This is your chance to dump cards you don't want.`,
+      tip: 'Get rid of Crisis cards here! Cards you discard may come back when the deck reshuffles, but at least they won\'t clog your hand next turn.'
+    };
+    default: return null;
+  }
+}
+
+// ==================== RENDERING ====================
+function render() {
+  const app = document.getElementById('app');
+  if (G.phase==='title') { renderTitle(app); return; }
+  if (G.phase==='tutorial') { renderTutorial(app); return; }
+  if (G.phase==='gameover') { renderGameOver(app); return; }
+
+  const help = getPhaseHelp();
+  const helpHtml = help ? `<div class="help-panel"><div class="help-box">
+    <div class="help-title">${help.title}</div>
+    <div>${help.text}</div>
+    ${help.tip?`<div class="help-tip">💡 ${help.tip}</div>`:''}
+  </div></div>` : '';
+
+  app.innerHTML = renderHeader() + '<div class="deco"></div>' + renderScoreboard() + renderMessage() + helpHtml + renderHandArea() + renderControls();
+  renderLog();
+}
+
+function renderTitle(app) {
+  app.innerHTML = `<div class="title-screen">
+    <h1>THE NEW DEAL<span class="sub">A Solitaire Card Game</span></h1>
+    <p class="dateline">Washington, D.C. &mdash; November 1932</p>
+    <p class="flavor">
+      The nation reels from the Great Depression.<br>
+      As Franklin D. Roosevelt, you must steer America toward recovery &mdash;<br>
+      balancing industry, agriculture, finance, and welfare<br>
+      across 15 critical turns of legislation and reform.
+    </p>
+    <button class="btn btn-gold btn-lg" onclick="showTutorial()">Read the Bulletin</button>
+    <p class="credit">Based on the card game by Lloyd Krassner (Warp Spawn Games, 2012)</p>
+  </div>`;
+}
+
+function renderGameOver(app) {
+  const [title, flavor] = getRating(G.finalScore);
+  let cats='';
+  CATS.forEach(c=>{
+    const low=G.scores[c]===G.finalMin, high=G.scores[c]===G.finalMax;
+    cats+=`<div class="fc${low?' is-low':''}${high?' is-high':''}">
+      <div class="fcl" style="color:${CAT_COLOR[c]}">${CAT_ICON[c]} ${c}</div>
+      <div class="fcv">${G.scores[c]}</div>
+    </div>`;
+  });
+  app.innerHTML = `<div class="game-over">
+    <h2>EXTRA! &mdash; Final Edition, 1937</h2>
+    <div class="final-cats">${cats}</div>
+    <div class="score-formula">
+      Lowest: <b style="color:var(--red)">${CAT_FULL[G.finalMinCat]} (${G.finalMin})</b> ×
+      Highest: <b style="color:var(--green)">${CAT_FULL[G.finalMaxCat]} (${G.finalMax})</b>
+    </div>
+    <div class="final-score">${G.finalScore}</div>
+    <div class="rating">${title}</div>
+    <div class="rating-flavor">${flavor}</div>
+    <div class="btn-group">
+      <button class="btn btn-gold btn-lg" onclick="startGame()">Play Again</button>
+    </div>
+  </div>`;
+}
+
+function startGame() { newGame(); showTutorial(); }
+
+function renderHeader() {
+  const names={proposal:'Drawing…',depression:'Crisis',legislation:'Legislation',legislation_ask:'Legislation',reform:'Reform',reform_ask:'Reform',force_discard:'Discard',politics:'Clean Up'};
+  return `<header>
+    <h1>THE NEW DEAL</h1>
+    <div class="hud">
+      <div class="hud-item"><span class="hud-label">Turn</span><span class="hud-value">${G.turn}/15</span></div>
+      <div class="hud-item"><span class="hud-label">Actions</span><span class="hud-value">${G.actions}</span></div>
+      <div class="hud-item"><span class="hud-label">Deck</span><span class="hud-value">${G.deck.length}</span></div>
+      <div class="hud-item"><span class="hud-label">Hand</span><span class="hud-value">${G.hand.length}</span></div>
+      <span class="hud-phase">${names[G.phase]||G.phase}</span>
+    </div>
+  </header>`;
+}
+
+function renderScoreboard() {
+  return `<div class="scoreboard">${CATS.map(c=>`<div class="score-cell" data-cat="${c}">
+    <div class="cat-label" style="color:${CAT_COLOR[c]}">${CAT_ICON[c]} ${c}</div>
+    <div class="cat-name">${CAT_FULL[c]}</div>
+    <div class="cat-score" style="color:${CAT_COLOR[c]}">${G.scores[c]}</div>
+  </div>`).join('')}</div>`;
+}
+
+function renderMessage() {
+  return `<div class="message-area"><div class="msg${G.crisisMsg?' crisis-msg':''}">${G.message}</div></div>`;
+}
+
+function renderHandArea() {
+  let html='';
+
+  // Meld category picker
+  if (G.phase==='reform' && !G.meldCat) {
+    html+=`<div style="width:100%;max-width:var(--max-w);padding:0 1.5rem;margin-bottom:0.4rem"><div class="cat-picker">`;
+    CATS.forEach(c=>{
+      const has=G.hand.some(cd=>!cd.crisis&&(cd.meld[c]||cd.meld._wild));
+      html+=`<button class="cat-btn" style="border-color:${CAT_COLOR[c]};color:${CAT_COLOR[c]}" ${has?`onclick="selectMeldCat('${c}')"`:'disabled'}>${CAT_ICON[c]} ${c}<br><span style="font-size:0.5rem">${CAT_FULL[c]}</span></button>`;
+    });
+    html+=`</div></div>`;
+  }
+
+  // Meld summary
+  if (G.meldCat && G.selected.size>0) {
+    const val=getMeldValue();
+    html+=`<div style="width:100%;max-width:var(--max-w);padding:0 1.5rem;margin-bottom:0.3rem">
+      <div class="meld-summary">Meld: <b style="color:${CAT_COLOR[G.meldCat]}">${CAT_ICON[G.meldCat]} ${CAT_FULL[G.meldCat]}</b> — <span class="meld-total">+${val}</span> (${G.selected.size} card${G.selected.size>1?'s':''})</div>
+    </div>`;
+  }
+
+  html+='<div class="hand-area">';
+  if (!G.hand.length) html+='<div style="color:var(--text-dim);font-style:italic;padding:2rem">Your hand is empty.</div>';
+
+  G.hand.forEach((card,idx)=>{
+    const cls=['card'];
+    if (G.selected.has(idx)) cls.push('selected');
+    if (card.crisis) cls.push('crisis');
+    let clickable=false, dimmed=false;
+
+    if (G.phase==='depression') { if (card.crisis) clickable=true; else dimmed=true; }
+    else if (G.phase==='legislation') { if (!card.crisis) clickable=true; else dimmed=true; }
+    else if (G.phase==='reform'&&G.meldCat) { if (!card.crisis&&(card.meld[G.meldCat]||card.meld._wild)) clickable=true; else dimmed=true; }
+    else if (G.phase==='politics'||G.phase==='force_discard') { clickable=true; }
+
+    if (clickable) cls.push('clickable');
+    if (dimmed) cls.push('dimmed');
+
+    let onclick='';
+    if (G.phase==='depression'&&card.crisis) onclick=`onclick="playCrisis(${idx})"`;
+    else if (G.phase==='legislation'&&!card.crisis) onclick=`onclick="playLegislation(${idx})"`;
+    else if (G.phase==='reform'&&G.meldCat&&(card.meld[G.meldCat]||card.meld._wild)) onclick=`onclick="toggleMeldCard(${idx})"`;
+    else if (G.phase==='politics'||G.phase==='force_discard') onclick=`onclick="toggleDiscardCard(${idx})"`;
+
+    let badges='';
+    if (!card.crisis) {
+      Object.keys(card.meld).filter(k=>k!=='_wild').forEach(c=>{
+        badges+=`<span class="cat-badge" style="background:${CAT_COLOR[c]}">${c}+${card.meld[c]}</span>`;
+      });
+      if (card.meld._wild) badges+=`<span class="cat-badge" style="background:var(--gold)">WILD+${card.meld._wild}</span>`;
+    }
+
+    const cats=card.crisis?'':Object.keys(card.meld).concat(card.meld._wild?CATS.slice():[]).filter(k=>k!=='_wild').join(',');
+    html+=`<div class="${cls.join(' ')}" ${onclick} data-cats="${cats}">
+      <div class="card-type">${card.crisis?'⚠ Crisis':'Policy'}</div>
+      <div class="card-name">${card.name}</div>
+      <div class="card-effect">${descCardShort(card)}</div>
+      ${badges?`<div class="card-cats">${badges}</div>`:''}
+    </div>`;
+  });
+  html+='</div>';
+  return html;
+}
+
+function renderControls() {
+  let h='<div class="controls-area"><div class="btn-group">';
+  const phase=G.phase;
+
+  if (phase==='legislation') {
+    h+=`<span class="pass-link" onclick="passPhase()">skip to Reform →</span>`;
+  } else if (phase==='legislation_ask') {
+    h+=`<button class="btn btn-gold" onclick="spendActionLeg()">Spend 1 Action — Play Again (${G.actions} left)</button>`;
+    h+=`<button class="btn btn-outline" onclick="passPhase()">Done → Reform</button>`;
+    h+=`<div style="width:100%;font-size:0.75rem;color:var(--text-dim);margin-top:0.3rem">Actions may be spent here to play an additional card, in the Reform phase for additional melds, or held for future turns</div>`;
+  } else if (phase==='reform'&&!G.meldCat) {
+    h+=`<span class="pass-link" onclick="passPhase()">skip to Clean Up →</span>`;
+  } else if (phase==='reform'&&G.meldCat) {
+    const v=getMeldValue();
+    h+=`<button class="btn btn-gold" onclick="playMeld()" ${!G.selected.size?'disabled':''}>Play Meld (+${v} to ${CAT_FULL[G.meldCat]})</button>`;
+    h+=`<button class="btn btn-outline" onclick="cancelMeld()">Cancel</button>`;
+  } else if (phase==='reform_ask') {
+    h+=`<button class="btn btn-gold" onclick="spendActionRef()">Spend 1 Action — Another Meld (${G.actions} left)</button>`;
+    h+=`<button class="btn btn-outline" onclick="passPhase()">Done → Clean Up</button>`;
+  } else if (phase==='force_discard') {
+    const n=G.selected.size, need=G._fdCount||1;
+    h+=`<button class="btn btn-gold" onclick="confirmForceDiscard()" ${n!==need?'disabled':''}>Discard ${n}/${need} Card${need!==1?'s':''}</button>`;
+    if (n<need) h+=`<span style="font-size:0.8rem;color:var(--text-dim);margin-left:0.5rem">← select ${need-n} more</span>`;
+  } else if (phase==='politics') {
+    const n=G.selected.size;
+    h+=`<button class="btn btn-gold" onclick="confirmDiscard()" ${n<1||n>5?'disabled':''}>Discard ${n} Card${n!==1?'s':''}</button>`;
+    if (n<1) h+=`<span style="font-size:0.8rem;color:var(--text-dim);margin-left:0.5rem">← click 1–5 cards first</span>`;
+  }
+
+  h+='</div></div>';
+  return h;
+}
+
+function renderLog() {
+  const p=document.getElementById('logPanel');
+  p.innerHTML=G.log.map(e=>`<div class="log-entry${e.startsWith('──')?' turn-header':''}">${e}</div>`).join('');
+  p.scrollTop=p.scrollHeight;
+}
+
+function toggleLog() { document.getElementById('logPanel').classList.toggle('hidden'); }
+
+// ==================== SCOREBOARD → HAND HIGHLIGHT ====================
+(function(){
+  const app=document.getElementById('app');
+  let activeCat=null;
+  app.addEventListener('mouseover', e=>{
+    const cell=e.target.closest('.score-cell');
+    if (!cell) return;
+    const cat=cell.dataset.cat;
+    if (cat===activeCat) return;
+    activeCat=cat;
+    document.querySelectorAll('.hand-area .card').forEach(c=>{
+      const cats=c.dataset.cats||'';
+      c.classList.toggle('cat-highlight', cats.split(',').includes(cat));
+    });
+  });
+  app.addEventListener('mouseout', e=>{
+    const cell=e.target.closest('.score-cell');
+    if (!cell) return;
+    const related=e.relatedTarget;
+    if (related && related.closest && related.closest('.score-cell')===cell) return;
+    activeCat=null;
+    document.querySelectorAll('.hand-area .card.cat-highlight').forEach(c=>c.classList.remove('cat-highlight'));
+  });
+})();
+
+// ==================== INIT ====================
+newGame();
+</script>
+</body>
+</html>
