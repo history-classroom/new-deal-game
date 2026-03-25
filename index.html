@@ -75,7 +75,7 @@ h1 {
 /* ===== SCOREBOARD ===== */
 .scoreboard {
   width: 100%; max-width: var(--max-w); padding: 0.6rem 2rem;
-  display: grid; grid-template-columns: repeat(8, 1fr); gap: 0;
+  display: grid; grid-template-columns: repeat(8, 1fr) auto; gap: 0;
   border-bottom: 1px solid var(--rule);
 }
 .score-cell {
@@ -83,6 +83,23 @@ h1 {
   background: transparent; border-left: 1px solid var(--rule); position: relative; transition: all 0.3s;
 }
 .score-cell:first-child { border-left: none; }
+.score-total {
+  text-align: center; padding: 0.5rem 0.6rem;
+  border-left: 2px solid var(--rule-dark); position: relative; cursor: help;
+}
+.score-total .total-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--text-dim); }
+.score-total .total-value { font-family: var(--serif); font-size: 1.8rem; font-weight: 900; color: var(--text-dark); }
+.score-total .total-tooltip {
+  display: none; position: absolute; bottom: calc(100% + 0.5rem); right: 0;
+  background: var(--text-dark); color: var(--cream); font-size: 0.75rem; line-height: 1.5;
+  padding: 0.5rem 0.8rem; border-radius: 3px; white-space: nowrap; z-index: 10;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+}
+.score-total .total-tooltip::after {
+  content: ''; position: absolute; top: 100%; right: 1rem;
+  border: 6px solid transparent; border-top-color: var(--text-dark);
+}
+.score-total:hover .total-tooltip { display: block; }
 .score-cell .cat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
 .score-cell .cat-name { font-size: 0.65rem; color: var(--text-dim); }
 .score-cell .cat-score { font-family: var(--serif); font-size: 1.8rem; font-weight: 700; color: var(--text-dark); }
@@ -146,41 +163,35 @@ h1 {
 /* ===== HAND ===== */
 .hand-area {
   width: 100%; max-width: var(--max-w); padding: 0.5rem 1.5rem;
-  display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center;
-  min-height: 220px; align-items: flex-start;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+  min-height: 120px;
 }
 
 /* ===== CARDS ===== */
 .card {
-  width: 175px; min-height: 200px; border-radius: 2px; padding: 0.7rem 0.75rem;
-  display: flex; flex-direction: column; gap: 0.3rem; cursor: default;
-  border: 1.5px solid var(--rule-dark); background: var(--card-bg); color: var(--text-dark);
+  width: 100%; border-radius: 2px; padding: 0.6rem 1rem;
+  display: flex; flex-direction: column; gap: 0.15rem; cursor: default;
+  border: 1.5px solid var(--rule); background: var(--card-bg); color: var(--text-dark);
   font-size: 0.85rem; position: relative; transition: all 0.15s;
-  box-shadow: 1px 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.08);
 }
-.card:hover { transform: translateY(-5px); box-shadow: 2px 5px 14px rgba(0,0,0,0.15); }
-.card.clickable { cursor: pointer; border-color: var(--text-dark); }
-.card.clickable:hover { border-color: var(--gold); box-shadow: 2px 5px 14px rgba(107,42,20,0.18); }
-.card.selected { border-color: var(--gold); background: #e8d4b4; box-shadow: 0 0 10px rgba(107,42,20,0.18); transform: translateY(-8px); }
-.card.cat-highlight:not(.dimmed):not(.selected) { transform: translateY(-5px); box-shadow: 2px 5px 12px rgba(107,42,20,0.12); }
+.card:hover { box-shadow: 2px 3px 10px rgba(0,0,0,0.12); }
+.card.clickable { cursor: pointer; border-color: var(--rule-dark); }
+.card.clickable:hover { border-color: var(--gold); box-shadow: 2px 3px 10px rgba(107,42,20,0.15); transform: translateX(4px); }
+.card.selected { border-color: var(--gold); background: #e8d4b4; box-shadow: 0 0 8px rgba(107,42,20,0.15); }
 .card.dimmed { opacity: 0.25; pointer-events: none; }
 .card.crisis { background: var(--crisis-bg); border-color: var(--crisis-border); }
+.card.crisis.selected { border-color: var(--gold); background: #e0c8aa; box-shadow: 0 0 8px rgba(107,42,20,0.15); }
 .card.crisis .card-name { color: var(--crisis-text); }
 .card .card-type {
-  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700;
-  color: var(--text-dim); margin-bottom: 0.1rem;
+  font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700;
+  color: var(--text-dim);
 }
 .card.crisis .card-type { color: var(--crisis-text); font-weight: 900; }
-.card .card-name { font-family: var(--serif); font-size: 0.95rem; font-weight: 700; line-height: 1.25; color: var(--text-dark); }
-.card .card-effect { font-size: 0.8rem; line-height: 1.4; color: var(--text-dim); flex: 1; margin-top: 0.15rem; }
-.card.crisis .card-effect { color: #6a4a3a; }
-.card .card-cats { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: auto; padding-top: 0.3rem; }
-.cat-badge {
-  font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.4rem;
-  border-radius: 2px; color: #fff; text-transform: uppercase; letter-spacing: 0.05em;
-}
+.card .card-name { font-family: var(--serif); font-size: 1rem; font-weight: 700; line-height: 1.2; color: var(--text-dark); }
+.card .card-desc { font-size: 0.78rem; line-height: 1.4; color: var(--text-dim); margin-top: 0.1rem; }
 
-/* ===== MELD PICKER ===== */
+/* ===== CATEGORY PICKER (for any_one/any_two modals) ===== */
 .cat-picker { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
 .cat-btn {
   font-family: var(--sans); font-size: 0.85rem; font-weight: 700;
@@ -192,13 +203,22 @@ h1 {
 .cat-btn:disabled { opacity: 0.2; cursor: default; }
 .cat-btn.active { color: #fff !important; }
 
-/* ===== MELD SUMMARY ===== */
-.meld-summary {
-  background: var(--cream); border: 1px solid var(--rule-dark);
-  border-top: 3px double var(--rule-dark);
-  padding: 0.7rem 1.4rem; text-align: center; font-size: 1.05rem;
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed; top: 1rem; right: 1rem; z-index: 200;
+  display: flex; flex-direction: column; gap: 0.4rem; pointer-events: none;
 }
-.meld-summary .meld-total { font-family: var(--serif); font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
+.toast {
+  background: var(--text-dark); color: var(--cream); font-size: 0.85rem; font-weight: 600;
+  padding: 0.45rem 1rem; border-radius: 3px; box-shadow: 2px 3px 10px rgba(0,0,0,0.25);
+  animation: toastIn 0.25s ease-out, toastOut 0.4s ease-in 1.8s forwards;
+  white-space: nowrap; font-family: var(--sans);
+}
+.toast.positive { border-left: 4px solid var(--green); }
+.toast.negative { border-left: 4px solid var(--red); }
+.toast.neutral { border-left: 4px solid var(--rule); }
+@keyframes toastIn { from { opacity:0; transform:translateX(1rem); } to { opacity:1; transform:translateX(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translateY(-0.5rem); } }
 
 /* ===== CONTROLS ===== */
 .controls-area {
@@ -370,15 +390,16 @@ h1 {
   .scoreboard { grid-template-columns: repeat(4, 1fr); }
   .score-cell:nth-child(4n+1) { border-left: none; }
   .score-cell:nth-child(5) { border-top: 1px solid var(--rule); }
-  .card { width: 150px; min-height: 175px; }
+  .score-total { grid-column: 1 / -1; border-left: none; border-top: 2px solid var(--rule-dark); display: flex; gap: 0.5rem; align-items: center; justify-content: center; }
+  .score-total .total-value { font-size: 1.4rem; }
   .t-cats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
   html { font-size: 15px; }
+  .hand-area { grid-template-columns: 1fr; }
   .scoreboard { grid-template-columns: repeat(4, 1fr); }
   .score-cell:nth-child(4n+1) { border-left: none; }
   .score-cell:nth-child(5) { border-top: 1px solid var(--rule); }
-  .card { width: 130px; min-height: 155px; }
   .tutorial h1 { font-size: 2.2rem; }
   .title-screen h1 { font-size: 3rem; }
   header { flex-direction: column; align-items: flex-start; }
@@ -388,6 +409,7 @@ h1 {
 </head>
 <body>
 <div id="app"></div>
+<div class="toast-container" id="toasts"></div>
 
 <div class="log-toggle"><button class="btn btn-sm btn-outline" onclick="toggleLog()">Log</button></div>
 <div class="log-panel hidden" id="logPanel"></div>
@@ -413,10 +435,143 @@ const CAT_HINT = {
   BK:'Bank stability', NS:'Public morale', IF:'Money supply', PW:'Roads & dams', WF:'Jobs & relief'
 };
 
+const CARD_DESC = {
+  "Franklin Delano Roosevelt": "FDR won the 1932 presidency in a landslide during the worst of the Depression, with 25% unemployment. He launched the New Deal \u2014 relief, recovery, and reform programs starting with a historic first 100 days.",
+  "Power of Government": "FDR dramatically expanded federal power, creating dozens of agencies for banking regulation, job creation, and social insurance. This shift established the idea that the federal government was responsible for citizens\u2019 economic well-being.",
+  "Louis McHenry Howe": "Howe was a former reporter who became FDR\u2019s most loyal political advisor, managing his career from 1909 through polio and beyond. As Secretary to the President, he shaped early programs like the CCC and mentored Eleanor into public life.",
+  "Bold, Persistent Experimentation": "In a 1932 speech, FDR declared the country needed to try something and, if it failed, try something else. This pragmatic philosophy guided the New Deal as programs were launched, tested, and replaced without rigid ideology.",
+  "Broad Programs": "The New Deal spanned banking reform, farm aid, public works, rural electrification, and labor protections simultaneously. No previous president had attempted to reshape so many parts of American life at once.",
+  "Social Welfare": "Before the New Deal, the federal government offered almost no direct help to poor, elderly, or unemployed Americans. FDR created Social Security and federal relief agencies, establishing a national duty to provide a basic safety net.",
+  "Unemployment Relief": "With one in four Americans jobless by 1933, Roosevelt created agencies like the CCC, CWA, and WPA to hire millions directly. These programs provided paychecks to desperate families and built roads, bridges, and schools still used decades later.",
+  "Restore Faith of the Nation": "When FDR took office, public confidence had collapsed after three years of worsening depression under Hoover. Roosevelt\u2019s energetic action and optimistic tone convinced millions that someone was finally taking charge.",
+  "Restore Shattered Economy": "The U.S. economy had shrunk by roughly half between 1929 and 1933, with production, prices, and wages in freefall. The New Deal attacked on multiple fronts; full recovery came only with WWII, but growth was significant under FDR\u2019s first term.",
+  "Federal Regulation": "The New Deal created regulatory agencies like the SEC, FDIC, and NLRB to police Wall Street, protect depositors, and oversee labor. These regulations aimed to prevent the reckless speculation blamed for causing the Depression.",
+  "Outbursts of Violence": "Hunger, eviction, and unemployment drove clashes between strikers and police, farmers blocking foreclosures, and riots by desperate workers. These episodes reflected genuine fear that without government relief, the social order might collapse.",
+  "Protests Against Foreclosures": "Farmers facing foreclosure organized resistance, physically blocking sales, intimidating bidders, and sometimes threatening judges. These \"penny auctions\" pushed the government to create agencies like the Farm Credit Administration to refinance agricultural debt.",
+  "Brain Trust": "The Brain Trust was a group of Columbia professors \u2014 Moley, Tugwell, and Berle \u2014 who advised FDR\u2019s 1932 campaign. They designed core First New Deal policies including the NRA and the AAA.",
+  "Raymond Moley": "Moley organized FDR\u2019s Brain Trust and wrote most of his first inaugural address. He broke with Roosevelt by mid-1933 over policy disagreements and became a prominent conservative critic.",
+  "Rexford Guy Tugwell": "Tugwell was a Columbia economist and Brain Truster who believed large-scale government planning was needed to end the Depression. He helped create the AAA and championed experimental communities before political opposition forced him out in 1936.",
+  "Adolf Berle Jr.": "Berle was a Columbia law professor, Brain Trust member, and co-author of a groundbreaking study of corporate power. He wrote FDR\u2019s 1932 Commonwealth Club Address and helped draft the Securities Act of 1933.",
+  "Bank Closures": "Approximately 9,000 banks failed between 1930 and 1933, wiping out millions of depositors\u2019 savings with no federal insurance. By FDR\u2019s inauguration, the banking system had essentially ceased to function across the country.",
+  "Fear Itself": "FDR\u2019s inaugural declaration that \"the only thing we have to fear is fear itself\" directly addressed the panic gripping the nation. The speech reframed the Depression as a challenge to overcome through courage, setting the tone for aggressive government action.",
+  "First 100 Days": "Congress passed fifteen major bills between FDR\u2019s inauguration and mid-June 1933, including the Emergency Banking Act and the AAA. This unprecedented burst of legislation set the standard by which every later president\u2019s early days are measured.",
+  "President's Speeches": "FDR was among history\u2019s most gifted political communicators, using speeches to explain policy, build support, and rally a demoralized nation. His addresses pressured reluctant lawmakers and maintained the public enthusiasm needed for his ambitious agenda.",
+  "Rehabilitate the Banks": "FDR declared a nationwide Bank Holiday on March 6, 1933, shutting every bank to stop panicked withdrawals. Federal examiners reviewed each bank\u2019s books, and FDR\u2019s first fireside chat reassured Americans their reopened banks were safe.",
+  "Issue Edicts": "FDR issued over 3,700 executive orders \u2014 far more than any other president \u2014 to implement New Deal policies. The most dramatic was Executive Order 6102, requiring citizens to turn in gold so the government could devalue the dollar.",
+  "Fireside Chats": "FDR\u2019s roughly 30 evening radio addresses spoke directly to Americans in a calm, conversational tone about his policies. The first chat during the banking crisis was so effective that deposits flowed back into banks the very next day.",
+  "New Deal": "The New Deal was FDR\u2019s sweeping set of programs and reforms to combat the Depression, named in his 1932 nomination speech. It permanently transformed American government, creating institutions like Social Security and the SEC that remain central today.",
+  "Propose Bills": "FDR sent an extraordinary number of legislative proposals to Congress, making the president the primary driver of lawmaking. During the First 100 Days alone, he proposed and Congress passed fifteen major pieces of legislation.",
+  "Sign Bills into Law": "Roosevelt signed a historic volume of landmark legislation, including Social Security, the NIRA, the Wagner Act, and the Banking Acts. This reflected both the Depression\u2019s severity and FDR\u2019s ability to work with large Democratic majorities in Congress.",
+  "Glass-Steagall Act": "This law forced banks to separate regular banking from stock market speculation, protecting ordinary depositors\u2019 savings. It stabilized the banking system for decades after thousands of banks had failed during the Depression.",
+  "Federal Deposit Insurance": "The FDIC guaranteed individual bank deposits up to $2,500, so people would not lose their savings if a bank failed. It effectively ended the epidemic of bank runs since depositors no longer had reason to panic.",
+  "Repeal Prohibition": "The Twenty-First Amendment ended the nationwide alcohol ban that had been in effect since 1920. Repeal was enormously popular, creating jobs, generating tax revenue, and eliminating a major source of organized crime.",
+  "Relief Recovery Reform": "The \"Three R\u2019s\" described the New Deal\u2019s goals: immediate relief for the suffering, economic recovery, and long-term reform. This framework organized everything from emergency food assistance to public works to the creation of the SEC and Social Security.",
+  "Ratify Amendment": "Two amendments were ratified in 1933: the Twentieth moved Inauguration Day to January 20, and the Twenty-First repealed Prohibition. The earlier inauguration date mattered because the long gap after FDR\u2019s election had left the country leaderless during the banking crisis.",
+  "Century of Progress": "The Century of Progress was a Chicago World\u2019s Fair celebrating 100 years of scientific advancement since the city\u2019s founding. Despite opening during the Depression, it drew nearly 49 million visitors and turned a profit, offering welcome optimism.",
+  "Far Reaching Legislation": "New Deal laws reached into areas the federal government had never touched: labor, agriculture, banking, housing, and social insurance. Landmark statutes like Social Security and the Wagner Act created frameworks that remain in effect today.",
+  "Farm Crisis": "Crop prices fell so low that corn was cheaper to burn than coal and milk was dumped because transport cost more than it was worth. The AAA responded by paying farmers to reduce production \u2014 a radical approach providing desperately needed rural income.",
+  "Stabilize Crop Prices": "The AAA used production controls and government purchasing to end overproduction that had driven prices to historic lows. Without stable prices, farm failures threatened to drag rural banks and entire regional economies down with them.",
+  "Subsidize Scarcity": "The AAA paid farmers to destroy crops and kill livestock to reduce surplus supply and raise prices. In 1933, ten million acres of cotton were plowed under and six million pigs slaughtered, raising farm income roughly 50%.",
+  "Henry Agard Wallace": "Wallace served as FDR\u2019s Secretary of Agriculture and later became Vice President. He oversaw the AAA, which paid farmers to cut production to raise crop prices \u2014 a dramatic shift in federal agricultural policy.",
+  "Agricultural Adjustment Act": "The AAA paid farmers to reduce crop production and livestock herds, aiming to raise collapsed farm prices. Critics were outraged that crops were plowed under while Americans went hungry; the Supreme Court struck it down in 1936.",
+  "Farm Subsidies": "Government payments kept agriculture profitable when overproduction had driven crop prices below the cost of farming. These subsidies established the principle of federal support for farm incomes \u2014 a policy tradition continuing through modern farm bills.",
+  "Harold L. Ickes": "Ickes served as Secretary of the Interior and directed the Public Works Administration, overseeing billions in construction projects. Known as \"Honest Harold,\" he fought corruption and served FDR\u2019s entire presidency alongside Frances Perkins.",
+  "Farm Bill": "The AAA of 1933, followed by updated laws in 1936 and 1938, established the tradition of omnibus farm legislation. These bills created the framework of price supports, production controls, and crop insurance still reauthorized in farm bills today.",
+  "Go Off the Gold Standard": "FDR ended the gold standard via Executive Order 6102, requiring citizens to turn in gold coins and bullion. This freed the government to expand the money supply, helping debt-burdened farmers and businesses crushed by deflation.",
+  "Stunning Press Release": "FDR held roughly two press conferences per week, giving him unmatched ability to shape news coverage and public opinion. Press secretary Stephen Early pioneered strategic media management, making the White House far more press-savvy than any predecessor.",
+  "Inflationary Proposal": "Some FDR advisors pushed to devalue the dollar, expand the money supply, and abandon the gold standard to fight falling prices. Conservatives warned of currency destruction, but FDR adopted several measures, including leaving the gold standard in 1933.",
+  "Gold Buying": "The administration purchased gold at rising prices to drive down the dollar and raise commodity prices for struggling farmers. FDR and advisors literally set gold prices over breakfast each morning in an urgent push to fight deflation.",
+  "Silver Purchase Act": "This act directed the Treasury to buy large quantities of silver, subsidizing Western mining states and expanding the money supply. It unintentionally destabilized China\u2019s silver-based currency and did little for domestic recovery.",
+  "Controlled Inflation": "FDR pursued managed inflation to reverse devastating deflation that had crushed farmers and increased the real burden of debt. Leaving the gold standard and devaluing the dollar gradually raised prices, easing debt for millions of families and businesses.",
+  "Fiscal Policy": "The New Deal shifted toward using government spending to fight downturns, influenced by economist John Maynard Keynes. FDR\u2019s premature 1937 budget cuts triggered a recession, but the precedent of federal economic responsibility was set.",
+  "Gold Reserve Act": "This act nationalized the gold supply and devalued the dollar by raising gold\u2019s price from $20.67 to $35 per ounce. The devaluation boosted the Treasury\u2019s balance sheet by billions and made American exports cheaper worldwide.",
+  "Emergency Banking Relief Act": "Passed five days after FDR took office, this act let the Treasury inspect banks and reopen only sound ones. When banks reopened on March 13, deposits exceeded withdrawals \u2014 public confidence was restored almost overnight.",
+  "National Industrial Recovery Act": "The NIRA authorized the president to regulate industry through codes of fair competition, set wages, and create the PWA. The Supreme Court unanimously struck it down in May 1935 as an unconstitutional delegation of legislative power.",
+  "Frances Perkins": "Perkins became the first woman in a presidential cabinet when FDR appointed her Secretary of Labor in 1933. She championed Social Security, unemployment insurance, the minimum wage, the 40-hour workweek, and child labor bans.",
+  "Industry-Wide Agreements": "Under the NRA, entire industries negotiated binding codes covering wages, hours, prices, and trade practices for every company. This replaced cutthroat competition with coordinated planning, though critics warned it created government-sponsored cartels.",
+  "Antitrust Law Exemptions": "The NIRA temporarily suspended federal antitrust laws so competing businesses could legally cooperate on prices, wages, and production. Critics argued this simply let big companies fix prices and squeeze out smaller competitors.",
+  "Collective Bargaining": "Section 7(a) of the NIRA guaranteed workers the right to organize and bargain collectively and banned anti-union contracts. Enforcement was weak, which led Congress to pass the stronger Wagner Act in 1935.",
+  "Worker's Rights": "The New Deal was the first time the federal government broadly sided with workers over employers on organizing rights. Before this, workers who tried to unionize could be legally fired, blacklisted, or met with violent strikebreaking.",
+  "Minimum Wages": "NRA codes set minimum wages of 20 to 45 cents per hour \u2014 the first federal floor on American pay. These protections ended when the NIRA was struck down but laid groundwork for the 1938 Fair Labor Standards Act.",
+  "Public Works Administration": "The PWA funded large-scale construction like dams, bridges, hospitals, and schools through contracts to private firms. Unlike the WPA\u2019s focus on maximum hiring, the PWA built major lasting infrastructure and stimulated heavy industry.",
+  "National Recovery Administration": "The NRA oversaw industry codes of fair competition under General Hugh Johnson, approving 557 basic codes in two years. Critics charged it with favoring big business and fostering monopoly-like behavior.",
+  "Hugh Johnson": "Johnson led the National Recovery Administration and launched the iconic Blue Eagle campaign to rally public support. His combative style made him Time\u2019s 1933 Man of the Year but also led to his forced resignation in 1934.",
+  "We Do Our Part": "The Blue Eagle symbol was displayed by businesses complying with NRA codes, with FDR urging consumers to buy only from them. It turned shopping into an act of national solidarity and pressured non-compliant businesses through boycott threats.",
+  "NRA Codes": "These codes set minimum wages, maximum hours, minimum prices, and child labor bans for each industry. Small businesses felt the codes were written to benefit large corporations at their expense.",
+  "Maximum Hours": "NRA codes capped the workweek at 35 to 45 hours to improve conditions and spread jobs among more workers. Limiting hours aimed to force employers to hire additional people, turning labor regulation into a job-creation strategy.",
+  "Outlaw Child Labor": "The NRA\u2019s blanket code effectively banned child labor, achieving what reformers had fought for since the 1800s. Permanent restrictions came later through the Fair Labor Standards Act of 1938 after the NIRA was struck down.",
+  "Highways & Subways": "New Deal agencies built or improved roughly 650,000 miles of roads, thousands of bridges, and urban transit systems. These projects employed workers during the Depression and gave the country a modern transportation network for decades.",
+  "Dams & Power Plants": "The New Deal built massive dams and hydroelectric projects including Hoover Dam and the TVA system across the country. These brought flood control and electricity to millions of rural Americans that private utility companies had refused to serve.",
+  "Hospitals & Housing Projects": "The PWA funded hundreds of hospitals, clinics, and some of the first large-scale public housing projects in American cities. These addressed two crises at once: putting construction workers back on the job while improving health and housing conditions.",
+  "Schools & Playgrounds": "New Deal agencies built or improved thousands of schools, playgrounds, parks, and community centers nationwide. The WPA alone constructed roughly 5,900 new school buildings, investing in public spaces to strengthen communities and create jobs.",
+  "Reconstruction Finance Corp.": "Created under Hoover in 1932, the RFC made emergency loans to banks, railroads, and large institutions on the verge of collapse. Under Roosevelt, it was vastly expanded, eventually lending billions across the entire economy.",
+  "Jesse Jones": "Jones chaired the Reconstruction Finance Corporation, transforming it from a Hoover-era agency into a powerful New Deal instrument. The RFC reopened banks, rescued railroads, and financed agriculture, making Jones \"the fourth branch of government.\"",
+  "RFC Investments": "Under FDR, the RFC went beyond bank lending to make direct equity investments, fund public works, and finance agriculture. By the mid-1930s it had deployed billions, making it arguably the New Deal\u2019s single most important financial tool.",
+  "Securities Act": "The \"truth in securities\" law required companies selling stocks to provide honest financial information and face liability for lies. It responded directly to the fraud that had fueled the speculative bubble of the late 1920s.",
+  "Require Financial Statements": "For the first time, publicly traded companies had to file regular, standardized financial statements open to public inspection. Before this, companies could sell stock while keeping their actual finances secret from investors.",
+  "Deep Rooted Reform": "As the immediate emergency eased, the New Deal shifted from temporary relief to structural reforms preventing future depressions. Programs like Social Security, the SEC, and the FDIC embedded permanent safeguards to protect ordinary citizens for generations.",
+  "Securities & Exchange Commission": "The SEC was created to regulate the stock market and prevent the manipulation and insider trading behind the 1929 crash. FDR appointed Joseph Kennedy \u2014 who knew Wall Street\u2019s tricks \u2014 as its first chairman.",
+  "Wall Street Opposition": "Bankers and financiers viewed New Deal regulations as dangerous government overreach that would strangle free enterprise. FDR turned their opposition into a political asset, casting himself as ordinary Americans\u2019 champion against \"economic royalists.\"",
+  "Economic Legislation": "The New Deal produced laws like Glass-Steagall, the Securities Exchange Act, and the Banking Act of 1935. Together they imposed new rules on Wall Street and banking, creating a stable financial system for decades.",
+  "Sanction Unionization": "The Wagner Act made it federal policy to protect unionization, declaring that unequal bargaining power harmed the economy. Unlike the earlier NIRA, the NLRB had real power to hold elections, certify unions, and compel good-faith bargaining.",
+  "Poverty": "At the Depression\u2019s worst, an estimated 60 to 80 million Americans \u2014 roughly half the population \u2014 were living in poverty. This scale of suffering changed how the country thought about government\u2019s responsibility to its poorest citizens.",
+  "Run on Banks": "Bank runs occurred when panicked depositors rushed to withdraw money, and waves of them swept the country in the early 1930s. Even healthy banks collapsed in the chain reaction, leading directly to the FDIC\u2019s creation in 1933.",
+  "Unemployment": "Unemployment rose from about 3% in 1929 to 25% by 1933 \u2014 roughly 13 million Americans unable to find work. This mass joblessness drove the creation of work programs like the CCC and WPA, which employed millions on public projects.",
+  "Lost Foreign Trade": "The Smoot-Hawley Tariff of 1930 triggered retaliatory tariffs, collapsing American exports from $5.2 billion to $1.7 billion by 1933. The Reciprocal Trade Agreements Act of 1934 gave the president authority to negotiate lower tariffs country by country.",
+  "Stock Market Crash": "The October 1929 crash, with \"Black Tuesday\" on October 29, wiped out millions of investors and triggered the Great Depression. It exposed reckless speculation and margin buying \u2014 all later addressed through the creation of the SEC.",
+  "Sense of Purpose": "FDR restored national morale after years of economic collapse, breadlines, and political paralysis. Programs like the CCC and WPA put millions back to work building visible things, convincing citizens the crisis could be overcome.",
+  "Federal Art Project": "This WPA division employed thousands of out-of-work artists to create murals, sculptures, and posters for public buildings. It filled post offices, schools, and libraries with artwork, bringing culture into everyday American life at an unprecedented scale.",
+  "Bread Lines": "Bread lines were long queues of hungry, unemployed people waiting for free food from charities and soup kitchens. These images of mass suffering built public support for New Deal relief by making the scale of the crisis undeniable.",
+  "Homelessness": "Millions lost their homes and built makeshift shantytowns called \"Hoovervilles\" from scrap wood, cardboard, and tin across American cities. These camps symbolized government failure and built public support for New Deal housing and relief programs.",
+  "Welfare State": "A welfare state is a system where government protects citizens\u2019 basic economic well-being through social insurance and public aid. The New Deal built America\u2019s version \u2014 before the 1930s, the federal government played almost no role in helping people through hard times.",
+  "Dust Bowl": "Severe drought and poor farming turned millions of Great Plains acres into massive dust storms, displacing hundreds of thousands of people. The disaster prompted New Deal agencies like the Soil Conservation Service to promote better land management.",
+  "Labor Disputes": "Massive strikes erupted in auto, steel, textile, and longshoremen industries as workers fought for union recognition and better conditions. The Wagner Act of 1935 guaranteed organizing rights and led to a dramatic expansion of union membership.",
+  "Political Challenges": "FDR faced opposition from all sides: conservatives called him a socialist while populists like Huey Long demanded more radical action. These pressures actually shaped the New Deal, pushing Roosevelt toward the more ambitious Second New Deal of 1935.",
+  "Riots": "Hunger riots, eviction riots, and deadly clashes erupted in cities, including the 1932 Bonus Army dispersal and Ford plant killings. This civil unrest underscored the real danger that economic desperation could trigger broader social upheaval.",
+  "Harry Hopkins": "Hopkins ran FERA, the CWA, and then the WPA, becoming FDR\u2019s most trusted relief official. The WPA alone employed 8.5 million people building schools, hospitals, airports, and roads across the country.",
+  "FERA Program": "The Federal Emergency Relief Administration distributed $500 million in federal grants to states for direct relief programs. It established that the federal government \u2014 not just charities \u2014 had a responsibility to help citizens survive economic catastrophe.",
+  "Direct Relief": "Direct relief meant government cash or goods given straight to unemployed and destitute families during the Depression. FDR saw it as demoralizing and preferred work relief programs, which shaped later programs like the WPA.",
+  "Civil Works Administration": "The CWA put over four million Americans to work within weeks building roads, schools, and parks. Though shut down by spring 1934 due to cost, it proved government could quickly create mass employment and modeled the later WPA.",
+  "Works Progress Administration": "The WPA employed roughly 8.5 million Americans to build public buildings, roads, bridges, and parks and run arts programs. It gave people paychecks and purpose while building infrastructure that communities still use today.",
+  "Canker, Moths & Weevil Control": "Federal agencies expanded programs to combat agricultural pests like citrus canker, gypsy moths, and the boll weevil. These efforts put unemployed workers to use while protecting crop yields that New Deal price programs depended on.",
+  "Federal Theatre": "The Federal Theatre Project staged free or low-cost plays tackling social issues for audiences across the country. Congress shut it down in 1939 over accusations of communist influence, but it had brought live theater to millions of new audiences.",
+  "Federal Writers Project": "This WPA program employed writers \u2014 including Ralph Ellison, Zora Neale Hurston, and Richard Wright \u2014 to produce guidebooks and histories. Its slave narrative collection preserved firsthand accounts from formerly enslaved people that became invaluable to historians.",
+  "Federal Music Project": "This WPA program employed about 16,000 musicians to perform free public concerts, teach lessons, and collect folk songs. It brought live music from orchestras to jazz into communities that rarely had professional performances.",
+  "Black Cabinet": "The Black Cabinet was an informal group of African American advisors \u2014 including Mary McLeod Bethune \u2014 in New Deal agencies. They had no official power, but they marked the first meaningful Black access to White House policymaking.",
+  "National Youth Administration": "The NYA provided part-time jobs and work-study to Americans aged 16 to 25 so they could stay in school during the Depression. Led partly by Mary McLeod Bethune, it was notably racially inclusive, helping over 300,000 Black youth access opportunities.",
+  "Civilian Conservation Corps": "The CCC employed about three million young men in conservation work \u2014 planting trees, building trails, and fighting fires. It planted over three billion trees and developed 800+ parks while sending most workers\u2019 wages home to their families.",
+  "Soil Conservation Service": "This agency was established in response to the catastrophic Dust Bowl, which stripped topsoil from millions of Great Plains acres. It taught farmers contour plowing, terracing, and crop rotation, helping halt the environmental disaster.",
+  "Tennessee Valley Authority": "The TVA built dams, generated cheap hydroelectric power, controlled flooding, and promoted development across seven impoverished states. It brought electricity and modern infrastructure to one of America\u2019s poorest regions through large-scale government planning.",
+  "Rural Electrification Admin.": "The REA brought electric power to rural America, where only 10% of farms had electricity compared to 90% of urban homes. Low-interest federal loans to electric cooperatives powered lights, radios, and refrigerators for millions of farm families.",
+  "Public Utility Holding Co. Act": "This law targeted the pyramid-like corporate structures a few holding companies used to control most electric and gas utilities. Its \"death sentence\" clause let the SEC break up holding companies that served no useful economic purpose.",
+  "Brandeis Group": "This network of policymakers followed Justice Brandeis\u2019s belief that concentrated economic power threatened democracy. Felix Frankfurter placed key lawyers like Corcoran and Cohen into the administration, where they drafted major reform legislation.",
+  "Second Hundred Days": "Congress passed major legislation in summer 1935: Social Security, the Wagner Act, the WPA, and the Wealth Tax Act. This second wave created the modern social safety net and labor rights, proving more permanent than the first New Deal.",
+  "Revenue Act": "The \"Wealth Tax Act\" raised rates on high incomes, large corporations, and inherited wealth to challenge concentrated economic power. Its actual revenue was modest \u2014 its real significance was political, signaling the New Deal would fight inequality.",
+  "Estate, Gift & Capital Taxes": "Congress increased estate taxes, closed gift-tax loopholes, and raised capital gains taxes on the wealthy. These provisions challenged the extreme concentrations of inherited wealth that had dominated the Gilded Age and the 1920s.",
+  "Excess Profits Tax & Surtaxes": "The Revenue Act imposed a graduated corporate tax and surtaxes on individual incomes, with the top rate reaching 75%. These provisions targeted what FDR called \"an unjust concentration of wealth and economic power.\"",
+  "National Labor Relations Act": "The Wagner Act guaranteed private-sector workers the right to organize, bargain collectively, and strike with real enforcement. It created the NLRB and triggered a dramatic surge in union membership across the country.",
+  "Social Security Act": "This act created federal old-age pensions, unemployment insurance, and aid for dependent children and the disabled. It established the first government safety net promising Americans basic economic security in old age and hard times.",
+  "Unfair Labor Practices": "The Wagner Act defined specific illegal employer actions: interfering with organizing, dominating company unions, and refusing to bargain. For the first time, federal law spelled out what employers could not do to workers and gave the NLRB enforcement power.",
+  "Opposition by Big Business": "Corporate leaders bitterly opposed the New Deal, with the American Liberty League spending heavily to defeat FDR in 1936. Roosevelt won a historic landslide, carrying every state except Maine and Vermont.",
+  "US Housing Authority": "The Wagner-Steagall Act of 1937 created a federal agency to lend money for slum clearance and low-cost public housing. It was the first ongoing federal commitment to providing affordable housing for low-income Americans.",
+  "Home Owners Loan Corp.": "The HOLC refinanced roughly one million home mortgages in danger of foreclosure, rescuing homeowners and banks alike. It also introduced \"redlining\" \u2014 rating neighborhoods by lending risk in ways that systematically disadvantaged Black communities for generations.",
+  "Federal Housing Admin.": "The FHA insured private mortgage loans so banks would offer longer, lower-interest home loans to ordinary Americans. It made homeownership accessible to the middle class, though its lending guidelines reinforced racial segregation in housing.",
+  "Resettlement Administration": "Under Rexford Tugwell, this agency relocated struggling farmers from worn-out land and provided loans and technical help. Its photography division employed Dorothea Lange and Walker Evans, producing iconic Depression-era images.",
+  "Unemployment Insurance": "Part of the Social Security Act, this system provided temporary cash payments to workers who lost jobs through no fault of their own. It introduced the idea that government should cushion workers against job loss \u2014 still a core part of America\u2019s safety net.",
+  "Public Health Services": "Federal spending on public health expanded through the PWA and Social Security Act, funding hospitals, clinics, and disease prevention. Millions of Americans \u2014 especially in the rural South \u2014 had almost no access to modern healthcare before the government stepped in.",
+  "Eastern Floods": "Massive floods in March 1936 killed over 150 people and left hundreds of thousands homeless across the northeastern United States. The disaster reinforced arguments for federal dam and flood-control projects, with the WPA leading relief and rebuilding.",
+  "Shelter Belt": "This federal project planted over 200 million trees in strips from Texas to North Dakota to combat Dust Bowl erosion. The shelterbelts reduced wind speed, held topsoil in place, and retained moisture across open farmland.",
+  "John Collier": "Collier served as Commissioner of Indian Affairs and engineered the \"Indian New Deal.\" The Indian Reorganization Act of 1934 reversed forced assimilation by restoring tribal lands, enabling self-government, and preserving Native cultures.",
+  "Supreme Court Rulings": "The Supreme Court struck down key New Deal programs including the NIRA and the AAA as unconstitutional overreach by Congress. FDR\u2019s controversial \"court-packing\" plan failed, but the Court subsequently shifted toward upholding New Deal legislation.",
+  "Recession": "Premature government spending cuts in 1937 triggered a sharp recession \u2014 industrial production fell 33% and unemployment jumped to 19%. The \"Roosevelt Recession\" validated Keynes\u2019s argument that government spending was essential to sustain recovery.",
+  "Anti-Trust Policy": "The NRA initially suspended antitrust laws to let industries cooperate, but after the Court struck it down, the administration reversed course. The later push to break up monopolies reflected a real tension within the New Deal over how to handle corporate power."
+};
+
+
 // Card data: [name, effectString]  ! prefix = crisis
 const CARD_DATA = [
   ["Franklin Delano Roosevelt","A3|NS+2"],
-  ["Power of Government","M2"],
+  ["Power of Government","*+2"],
   ["Louis McHenry Howe","D2|A2"],
   ["Bold, Persistent Experimentation","D1&A2"],
   ["Broad Programs","**+1"],
@@ -447,7 +602,7 @@ const CARD_DATA = [
   ["Relief Recovery Reform","**+1"],
   ["Ratify Amendment","A2|NS+2"],
   ["Century of Progress","D3|NS+1"],
-  ["Far Reaching Legislation","M2"],
+  ["Far Reaching Legislation","*+2"],
   ["!Farm Crisis","AR-1"],
   ["Stabilize Crop Prices","AR+1|IF+1"],
   ["Subsidize Scarcity","AR+1|IF+1"],
@@ -549,7 +704,7 @@ const CARD_DATA = [
 // ==================== CARD PARSER ====================
 function parseEffect(t) {
   t = t.trim();
-  if (t === 'M2') return {type:'meld_bonus', value:2};
+  if (t === 'M2') return {type:'any_one', value:2}; // legacy, converted to any_one
   if (/^D\d+$/.test(t)) return {type:'draw', value:+t.slice(1)};
   if (/^A\d+$/.test(t)) return {type:'actions', value:+t.slice(1)};
   if (/^X\d+$/.test(t)) return {type:'force_discard', value:+t.slice(1)};
@@ -562,10 +717,10 @@ function parseEffect(t) {
 
 function parseCrisis(s) {
   if (s==='SL') return [{type:'skip_legislation'}];
-  if (s==='SR') return [{type:'skip_reform'}];
+  if (s==='SR') return [{type:'reduce_plays'}];
   if (s==='DR') return [{type:'discard_random'}];
   if (s==='NA') return [{type:'negate_actions'}];
-  if (s==='NM') return [{type:'negate_meld'}];
+  if (s==='NM') return [{type:'reduce_highest'}];
   const m = s.match(/^([A-Z]{2})(-\d+)$/);
   if (m) return [{type:'score', cat:m[1], value:+m[2]}];
   return [];
@@ -575,14 +730,10 @@ function buildCards(data) {
   return data.map(([raw, eff], i) => {
     const crisis = raw.startsWith('!');
     const name = crisis ? raw.slice(1) : raw;
-    if (crisis) return {id:i, name, crisis:true, effects:parseCrisis(eff), options:null, meld:{}, effectStr:eff};
+    const desc = CARD_DESC[name] || '';
+    if (crisis) return {id:i, name, desc, crisis:true, effects:parseCrisis(eff), options:null, effectStr:eff};
     const options = eff.split('|').map(o => o.split('&').map(parseEffect));
-    const meld = {};
-    for (const opt of options) for (const e of opt) {
-      if (e.type==='score' && e.value>0) { if (!meld[e.cat]||e.value>meld[e.cat]) meld[e.cat]=e.value; }
-      if (e.type==='meld_bonus') meld._wild = e.value;
-    }
-    return {id:i, name, crisis:false, options, meld, effectStr:eff};
+    return {id:i, name, desc, crisis:false, options, effectStr:eff};
   });
 }
 
@@ -594,34 +745,21 @@ function descEffect(e) {
       return e.value>0 ? `${full} +${e.value}` : `${full} ${e.value}`;
     }
     case 'draw': return `Draw ${e.value} card${e.value>1?'s':''}`;
-    case 'actions': return `+${e.value} Action${e.value>1?'s':''}`;
+    case 'actions': return `+${e.value} extra play${e.value>1?'s':''}`;
     case 'any_one': return `Any category +${e.value}`;
     case 'any_two': return `Choose 2 categories, each +${e.value}`;
-    case 'meld_bonus': return `Add +${e.value} to any Meld`;
     case 'force_discard': return `then discard ${e.value}`;
     case 'skip_legislation': return 'Skip your Legislation step this turn';
-    case 'skip_reform': return 'Skip your Reform step this turn';
+    case 'reduce_plays': return 'Lose 1 legislation play this turn';
     case 'discard_random': return 'Lose 1 random card from your hand';
-    case 'negate_actions': return 'Lose all your Actions';
-    case 'negate_meld': return 'Undo your last Meld this game';
+    case 'negate_actions': return 'Lose 1 legislation play this turn';
+    case 'reduce_highest': return 'Your highest category loses 2 points';
     default: return '?';
   }
 }
-function descOption(effects) { return effects.map(descEffect).join(' & '); }
-function descCardShort(card) {
+function descAllEffects(card) {
   if (card.crisis) return card.effects.map(descEffect).join(', ');
-  return card.options.map(o => o.map(e => {
-    switch(e.type) {
-      case 'score': return `${e.cat} ${e.value>0?'+':''}${e.value}`;
-      case 'draw': return `Draw ${e.value}`;
-      case 'actions': return `+${e.value} Act.`;
-      case 'any_one': return `Any +${e.value}`;
-      case 'any_two': return `Any 2 +${e.value}`;
-      case 'meld_bonus': return `Meld +${e.value}`;
-      case 'force_discard': return `Disc. ${e.value}`;
-      default: return descEffect(e);
-    }
-  }).join(' & ')).join('  ·  ');
+  return card.options.flat().map(descEffect).join(', ');
 }
 
 // ==================== GAME STATE ====================
@@ -633,9 +771,9 @@ function newGame() {
     hand: [], discard: [],
     scores: Object.fromEntries(CATS.map(c=>[c,0])),
     turn: 0, phase: 'title',
-    actions: 0, log: [],
-    skipLeg: false, skipRef: false, lastMeld: null,
-    selected: new Set(), meldCat: null,
+    log: [],
+    skipLeg: false, legPlays: 0, legMax: 3,
+    selected: new Set(),
     pendingForceDiscard: 0, message: '', crisisMsg: false,
     tutPage: 0,
   };
@@ -666,8 +804,8 @@ function setMsg(t, crisis=false) { G.message=t; G.crisisMsg=crisis; }
 function startTurn() {
   G.turn++;
   if (G.turn > 15) { endGame(); return; }
-  G.skipLeg=false; G.skipRef=false;
-  G.selected.clear(); G.meldCat=null;
+  G.skipLeg=false; G.legPlays=0; G.legMax=3;
+  G.selected.clear();
   addLog(`── Turn ${G.turn} ──`);
   proposalPhase();
 }
@@ -701,17 +839,20 @@ function playCrisis(idx) {
   addLog(`CRISIS: ${card.name}`);
   for (const e of card.effects) {
     switch(e.type) {
-      case 'score': G.scores[e.cat]+=e.value; addLog(`  ${CAT_FULL[e.cat]} ${e.value}`); flashScore(e.cat,e.value); break;
-      case 'skip_legislation': G.skipLeg=true; addLog('  Legislation skipped!'); break;
-      case 'skip_reform': G.skipRef=true; addLog('  Reform skipped!'); break;
+      case 'score': G.scores[e.cat]+=e.value; addLog(`  ${CAT_FULL[e.cat]} ${e.value}`); flashScore(e.cat,e.value); showToast(`${e.value} ${CAT_FULL[e.cat]}`,'negative'); break;
+      case 'skip_legislation': G.skipLeg=true; addLog('  Legislation skipped!'); showToast('Legislation skipped!','negative'); break;
+      case 'reduce_plays': G.legMax=Math.max(1,G.legMax-1); addLog('  Lost 1 legislation play!'); showToast('Lost 1 legislation play','negative'); break;
       case 'discard_random':
-        if (G.hand.length) { const r=Math.floor(Math.random()*G.hand.length); const c=G.hand.splice(r,1)[0]; G.discard.push(c); addLog(`  Lost card: ${c.name}`); }
+        if (G.hand.length) { const r=Math.floor(Math.random()*G.hand.length); const c=G.hand.splice(r,1)[0]; G.discard.push(c); addLog(`  Lost card: ${c.name}`); showToast(`Lost: ${c.name}`,'negative'); }
         break;
-      case 'negate_actions': { const l=G.actions; G.actions=0; addLog(`  Lost ${l} actions`); break; }
-      case 'negate_meld':
-        if (G.lastMeld) { G.scores[G.lastMeld.cat]-=G.lastMeld.value; addLog(`  Undid meld: ${CAT_FULL[G.lastMeld.cat]} -${G.lastMeld.value}`); flashScore(G.lastMeld.cat,-G.lastMeld.value); G.lastMeld=null; }
-        else addLog('  No meld to undo.');
+      case 'negate_actions': G.legMax=Math.max(1,G.legMax-1); addLog('  Lost 1 legislation play!'); showToast('Lost 1 play','negative'); break;
+      case 'reduce_highest': {
+        const vals=CATS.map(c=>G.scores[c]);
+        const mx=Math.max(...vals);
+        const cat=CATS.find(c=>G.scores[c]===mx);
+        G.scores[cat]-=2; addLog(`  ${CAT_FULL[cat]} -2`); flashScore(cat,-2); showToast(`-2 ${CAT_FULL[cat]}`,'negative');
         break;
+      }
     }
   }
   setMsg(`Crisis resolved: <b>${card.name}</b> — ${card.effects.map(descEffect).join(', ')}`, true);
@@ -721,59 +862,25 @@ function playCrisis(idx) {
 
 function legislationPhase() {
   if (G.skipLeg) {
-    addLog('Legislation skipped (crisis).'); setMsg('Legislation <b>skipped</b> by crisis! Moving to Reform...', true);
-    setTimeout(()=>{ reformPhase(); }, 700); render(); return;
+    addLog('Legislation skipped (crisis).'); setMsg('Legislation <b>skipped</b> by crisis! Moving to Clean Up...', true);
+    setTimeout(()=>{ politicsPhase(); }, 700); render(); return;
   }
   G.phase='legislation'; G.selected.clear();
-  setMsg('⚖️ <b>Legislation</b> — Click a card to play it for its effect.');
+  const rem=G.legMax-G.legPlays;
+  setMsg(`⚖️ <b>Legislation</b> — Click a card to play it. (${G.legPlays+1} of ${G.legMax})`);
   render();
 }
+function hasPlayableCards() { return G.hand.some(c=>!c.crisis); }
 
 function playLegislation(idx) {
   const card = G.hand[idx];
   if (!card||card.crisis) return;
-  if (card.options.length===1 && !optNeedsChoice(card.options[0])) {
-    G.hand.splice(idx,1); G.discard.push(card);
-    addLog(`Played: ${card.name}`);
-    resolveEffects(card.options[0], ()=>afterLegPlay());
-    return;
-  }
-  showOptionModal(card, idx);
-}
-
-function optNeedsChoice(effs) { return effs.some(e=>e.type==='any_one'||e.type==='any_two'); }
-
-function showOptionModal(card, idx) {
-  const m = document.getElementById('modal');
-  let h = `<div class="modal"><h2>${card.name}</h2><p>This card has multiple effects. Pick the one you want:</p>`;
-  card.options.forEach((opt,i) => {
-    h += `<button class="option-btn" onclick="chooseOption(${idx},${i})">
-      ${descOption(opt)}
-      <span class="opt-desc">${optHint(opt)}</span>
-    </button>`;
-  });
-  h += `<div class="btn-group" style="margin-top:0.8rem"><button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button></div></div>`;
-  m.innerHTML = h; m.classList.remove('hidden');
-}
-
-function optHint(effects) {
-  const types = effects.map(e=>e.type);
-  if (types.includes('score')) { const s=effects.find(e=>e.type==='score'); return `Boosts your ${CAT_FULL[s.cat]} score`; }
-  if (types.includes('draw')) return 'Get more cards in your hand';
-  if (types.includes('actions')) return 'Actions let you play extra cards later';
-  if (types.includes('any_one')) return "You'll pick which category to boost";
-  if (types.includes('any_two')) return "You'll pick 2 categories to boost";
-  if (types.includes('meld_bonus')) return 'Use with a Meld for a bigger bonus';
-  return '';
-}
-
-function chooseOption(idx, optIdx) {
-  closeModal();
-  const card = G.hand[idx]; if (!card) return;
-  const effects = card.options[optIdx];
   G.hand.splice(idx,1); G.discard.push(card);
-  addLog(`Played: ${card.name} → ${descOption(effects)}`);
-  resolveEffects(effects, ()=>afterLegPlay());
+  const allEffects = card.options.flat();
+  const desc = allEffects.map(descEffect).join(', ');
+  addLog(`Played: ${card.name} → ${desc}`);
+  setMsg(`Played: <b>${card.name}</b> — ${desc}`);
+  resolveEffects(allEffects, ()=>afterLegPlay());
 }
 
 function resolveEffects(effects, cb) {
@@ -782,10 +889,9 @@ function resolveEffects(effects, cb) {
     if (i>=effects.length) { render(); cb(); return; }
     const e=effects[i++];
     switch(e.type) {
-      case 'score': G.scores[e.cat]+=e.value; flashScore(e.cat,e.value); next(); break;
-      case 'draw': G.hand.push(...drawCards(e.value)); addLog(`  Drew ${e.value} card${e.value>1?'s':''}`); next(); break;
-      case 'actions': G.actions+=e.value; addLog(`  +${e.value} actions (total: ${G.actions})`); next(); break;
-      case 'meld_bonus': next(); break;
+      case 'score': G.scores[e.cat]+=e.value; flashScore(e.cat,e.value); showToast(`${e.value>0?'+':''}${e.value} ${CAT_FULL[e.cat]}`, e.value>0?'positive':'negative'); next(); break;
+      case 'draw': G.hand.push(...drawCards(e.value)); addLog(`  Drew ${e.value} card${e.value>1?'s':''}`); showToast(`+${e.value} card${e.value>1?'s':''}`,'neutral'); next(); break;
+      case 'actions': G.legMax+=e.value; addLog(`  +${e.value} extra play${e.value>1?'s':''}`); showToast(`+${e.value} extra play${e.value>1?'s':''}`,'positive'); next(); break;
       case 'force_discard': showForceDiscardModal(e.value, next); return;
       case 'any_one': showCatPickerModal(1,e.value,next); return;
       case 'any_two': showCatPickerModal(2,e.value,next); return;
@@ -839,73 +945,19 @@ function pickCat(cat) {
 }
 function confirmCatPick() {
   closeModal();
-  for (const cat of G._cpPicked) { G.scores[cat]+=G._cpVal; flashScore(cat,G._cpVal); addLog(`  ${CAT_FULL[cat]} +${G._cpVal}`); }
+  for (const cat of G._cpPicked) { G.scores[cat]+=G._cpVal; flashScore(cat,G._cpVal); addLog(`  ${CAT_FULL[cat]} +${G._cpVal}`); showToast(`+${G._cpVal} ${CAT_FULL[cat]}`,'positive'); }
   const cb=G._cpCb; G._cpCb=null; render(); cb();
 }
 
 function afterLegPlay() {
-  if (G.actions>0) {
-    setMsg(`Card played! You have <b>${G.actions} Action${G.actions>1?'s':''}</b> saved up. Spend one to play another card, or save them for extra Melds in Reform.`);
-    G.phase='legislation_ask'; render();
-  } else { reformPhase(); }
-}
-
-function spendActionLeg() {
-  G.actions--; addLog(`Spent 1 action (${G.actions} left)`);
-  G.phase='legislation'; G.selected.clear();
-  setMsg('⚖️ <b>Extra Legislation play!</b> Click another card, or <b>Pass</b>.');
-  render();
-}
-
-function reformPhase() {
-  if (G.skipRef) {
-    addLog('Reform skipped (crisis).'); setMsg('Reform <b>skipped</b> by crisis! Moving to discard...', true);
-    setTimeout(()=>politicsPhase(), 700); render(); return;
-  }
-  G.phase='reform'; G.selected.clear(); G.meldCat=null;
-  setMsg('🔧 <b>Reform</b> — Pick a category below, then select matching cards to build a Meld.');
-  render();
-}
-
-function selectMeldCat(cat) {
-  G.meldCat=cat; G.selected.clear();
-  setMsg(`Building a <b>${CAT_FULL[cat]}</b> meld — click the cards you want to include, then press <b>Play Meld</b>.`);
-  render();
-}
-function cancelMeld() { G.meldCat=null; G.selected.clear(); setMsg('🔧 <b>Reform</b> — Pick a category to meld, or <b>Pass</b>.'); render(); }
-function toggleMeldCard(idx) { if (G.selected.has(idx)) G.selected.delete(idx); else G.selected.add(idx); render(); }
-
-function getMeldValue() {
-  if (!G.meldCat) return 0;
-  let t=0;
-  for (const i of G.selected) { const c=G.hand[i]; if (c.meld._wild) t+=c.meld._wild; else if(c.meld[G.meldCat]) t+=c.meld[G.meldCat]; }
-  return t;
-}
-
-function playMeld() {
-  const cat=G.meldCat, val=getMeldValue();
-  if (val<=0||!G.selected.size) return;
-  const indices=[...G.selected].sort((a,b)=>b-a);
-  const names=indices.map(i=>G.hand[i].name);
-  for (const i of indices) G.discard.push(G.hand.splice(i,1)[0]);
-  G.scores[cat]+=val; G.lastMeld={cat,value:val}; flashScore(cat,val);
-  addLog(`Meld (${CAT_FULL[cat]} +${val}): ${names.join(', ')}`);
-  G.selected.clear(); G.meldCat=null;
-  setMsg(`Meld played! <b>${CAT_FULL[cat]} +${val}</b> 🎉`);
-  afterReformPlay();
-}
-
-function afterReformPlay() {
-  if (G.actions>0) {
-    G.phase='reform_ask';
-    setMsg(`Meld played! You have <b>${G.actions} Action${G.actions>1?'s':''}</b>. Spend one for another meld?`);
+  G.legPlays++;
+  if (G.legPlays < G.legMax && hasPlayableCards()) {
+    G.phase='legislation';
+    setMsg(`⚖️ <b>Legislation</b> — Play another card. (${G.legPlays+1} of ${G.legMax})`);
     render();
-  } else { setTimeout(()=>politicsPhase(), 500); render(); }
-}
-
-function spendActionRef() {
-  G.actions--; addLog(`Spent 1 action (${G.actions} left)`);
-  reformPhase();
+  } else {
+    setTimeout(()=>politicsPhase(), 500); render();
+  }
 }
 
 function politicsPhase() {
@@ -959,11 +1011,18 @@ function getRating(s) {
 }
 
 function passPhase() {
-  if (G.phase==='legislation'||G.phase==='legislation_ask') { addLog('Passed Legislation.'); reformPhase(); }
-  else if (G.phase==='reform'||G.phase==='reform_ask') { addLog('Passed Reform.'); politicsPhase(); }
+  if (G.phase==='legislation') { addLog('Passed Legislation.'); politicsPhase(); }
 }
 
 function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+function showToast(text, type='neutral') {
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.textContent=text;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 2400);
+}
 
 // ==================== SCORE FLASH ====================
 function flashScore(cat, value) {
@@ -1006,30 +1065,27 @@ const TUTORIAL_PAGES = [
       <div class="t-steps">
         <div class="t-step"><div class="t-step-num">1</div><div class="t-step-text"><b>Draw Cards</b><span class="t-detail">Your hand fills up to 9 cards. This happens automatically.</span></div></div>
         <div class="t-step"><div class="t-step-num">2</div><div class="t-step-text"><b>Handle Crises</b><span class="t-detail">If you have any red "Crisis" cards, you must play one. These are bad events — pick the least harmful one.</span></div></div>
-        <div class="t-step"><div class="t-step-num">3</div><div class="t-step-text"><b>Pass Legislation</b><span class="t-detail">Play one card from your hand to activate its effect (boost a score, draw more cards, or gain Actions). Or skip this step.</span></div></div>
-        <div class="t-step"><div class="t-step-num">4</div><div class="t-step-text"><b>Reform (Build a Meld)</b><span class="t-detail">Group cards that share a category and play them together for a combined bonus. This is how you score big! Or skip this step.</span></div></div>
-        <div class="t-step"><div class="t-step-num">5</div><div class="t-step-text"><b>Discard</b><span class="t-detail">Throw away 1–5 cards you don't want. Dump crisis cards when you can!</span></div></div>
+        <div class="t-step"><div class="t-step-num">3</div><div class="t-step-text"><b>Pass Legislation</b><span class="t-detail">Play up to 3 cards from your hand. Each card's effects are applied automatically — boosting scores, drawing cards, or earning extra plays.</span></div></div>
+        <div class="t-step"><div class="t-step-num">4</div><div class="t-step-text"><b>Discard</b><span class="t-detail">Throw away 1–5 cards you don't want. Dump crisis cards when you can!</span></div></div>
       </div>
     </div>`,
   ()=>`
     <div class="t-section">
-      <h2>🃏 Cards & Melds</h2>
-      <p><b>Most cards</b> show options separated by a dot ( · ). When you play one in Legislation, you'll <b>pick which effect</b> you want.</p>
-      <p><b>Melds</b> are the key to big scores! In the Reform step, you choose a category (like Welfare), then play <b>all your cards that boost Welfare</b> at once. Their bonuses add up!</p>
+      <h2>🃏 How Cards Work</h2>
+      <p>Each card represents a real New Deal program, person, or policy. When you play a card, <b>all of its effects</b> are applied automatically — you might boost one or more categories, draw extra cards, or earn extra plays this turn.</p>
+      <p>Some cards give you <b>extra plays</b> beyond the normal 3, letting you pass more legislation in a single turn!</p>
       <div class="t-highlight">
-        <b>Example:</b> You have 3 cards that each give Welfare +1.<br>
-        Play them as a meld → <b>Welfare +3</b> in one move!
+        <b>Tip:</b> Read the historical descriptions on each card — every card is a real piece of New Deal history!
       </div>
-      <p><b>Actions</b> are a bonus resource. Some cards give you Actions, which you can spend later to play <b>extra</b> cards in Legislation or extra Melds in Reform.</p>
     </div>`,
   ()=>`
     <div class="t-section">
       <h2>🎯 Tips for Success</h2>
       <ul>
         <li><b>Balance your scores.</b> Lowest × Highest means a zero in any category gives you a score of zero. Spread the love!</li>
-        <li><b>Save cards for melds.</b> Playing 3 cards together for +3 is better than playing them separately across 3 turns.</li>
+        <li><b>Play all 3 cards each turn.</b> Every card you play helps — don't waste your plays!</li>
         <li><b>Discard crisis cards</b> in the cleanup step when you can — get them out of your hand before you're forced to play them.</li>
-        <li><b>Actions are powerful.</b> Cards that give Actions let you play more cards in a single turn.</li>
+        <li><b>Extra plays are powerful.</b> Some cards let you play more cards in the same turn.</li>
         <li>Don't panic! Even bad turns are historically accurate. 😄</li>
       </ul>
       <div class="t-highlight">
@@ -1068,42 +1124,6 @@ function tutPrev() { if (G.tutPage>0) { G.tutPage--; render(); } }
 function beginPlay() { G.phase='playing'; startTurn(); }
 function showTutorial() { G.phase='tutorial'; G.tutPage=0; render(); }
 
-// ==================== PHASE HELP TEXT ====================
-function getPhaseHelp() {
-  switch(G.phase) {
-    case 'depression': return {
-      title: '💡 What to do', text: `You have <b>crisis cards</b> (shown in red). These represent bad events during the Depression. You <b>must</b> play one — click on the red card that hurts the least. After it resolves, you'll move to Legislation.`,
-      tip: 'Strategy: In the Discard step later, you can throw away crisis cards to avoid them next turn.'
-    };
-    case 'legislation': return {
-      title: '💡 What to do', text: `Click any <b>white card</b> to play it. If a card shows options separated by " · ", you'll get to <b>choose which effect</b> you want. Effects include boosting category scores, drawing more cards, and earning Actions.`,
-      tip: 'You can also press Pass to skip this step and save your cards for a Meld instead.'
-    };
-    case 'legislation_ask': return {
-      title: '💡 Actions available!', text: `<b>Actions</b> let you play extra cards! You can spend 1 Action now to play another card in Legislation, or save your Actions for extra Melds in the Reform step.`,
-      tip: 'Actions carry over between turns, so there\'s no rush to spend them.'
-    };
-    case 'reform': return G.meldCat ? {
-      title: `💡 Building a ${CAT_FULL[G.meldCat]} meld`, text: `Click the <b>highlighted cards</b> to add them to your meld. Each card's bonus for ${CAT_FULL[G.meldCat]} will be added together. Cards marked <span class="cat-badge" style="background:var(--gold);font-size:0.55rem">WILD</span> add +2 to any meld.`,
-      tip: `More cards = bigger bonus! When you're ready, press "Play Meld".`
-    } : {
-      title: '💡 What to do', text: `A <b>Meld</b> is a group of cards that all boost the <b>same category</b>. Pick a category from the colored buttons above, then select which cards to include. Their bonuses add up!`,
-      tip: 'This is the main way to score big. Save up matching cards and play them together!'
-    };
-    case 'reform_ask': return {
-      title: '💡 Play another meld?', text: `You still have <b>Actions</b> available. You can spend one to build another meld for a different category, or press Pass to move on.`,
-      tip: 'If you have cards for multiple categories, now is a great time to use them.'
-    };
-    case 'force_discard': return {
-      title: '💡 Discard required', text: `You drew extra cards and must discard <b>${G._fdCount||1}</b>. Click the card${(G._fdCount||1)>1?'s':''} you want to get rid of, then confirm.`,
-    };
-    case 'politics': return {
-      title: '💡 What to do', text: `Click <b>1 to 5 cards</b> to select them for discard (they'll glow when selected). Then press <b>Confirm</b>. This is your chance to dump cards you don't want.`,
-      tip: 'Get rid of Crisis cards here! Cards you discard may come back when the deck reshuffles, but at least they won\'t clog your hand next turn.'
-    };
-    default: return null;
-  }
-}
 
 // ==================== RENDERING ====================
 function render() {
@@ -1112,14 +1132,7 @@ function render() {
   if (G.phase==='tutorial') { renderTutorial(app); return; }
   if (G.phase==='gameover') { renderGameOver(app); return; }
 
-  const help = getPhaseHelp();
-  const helpHtml = help ? `<div class="help-panel"><div class="help-box">
-    <div class="help-title">${help.title}</div>
-    <div>${help.text}</div>
-    ${help.tip?`<div class="help-tip">💡 ${help.tip}</div>`:''}
-  </div></div>` : '';
-
-  app.innerHTML = renderHeader() + '<div class="deco"></div>' + renderScoreboard() + renderMessage() + helpHtml + renderHandArea() + renderControls();
+  app.innerHTML = renderHeader() + '<div class="deco"></div>' + renderScoreboard() + renderMessage() + renderHandArea() + renderControls();
   renderLog();
 }
 
@@ -1131,7 +1144,7 @@ function renderTitle(app) {
       The nation reels from the Great Depression.<br>
       As Franklin D. Roosevelt, you must steer America toward recovery &mdash;<br>
       balancing industry, agriculture, finance, and welfare<br>
-      across 15 critical turns of legislation and reform.
+      across 15 critical turns of New Deal policymaking.
     </p>
     <button class="btn btn-gold btn-lg" onclick="showTutorial()">Read the Bulletin</button>
     <p class="credit">Based on the card game by Lloyd Krassner (Warp Spawn Games, 2012)</p>
@@ -1167,12 +1180,11 @@ function renderGameOver(app) {
 function startGame() { newGame(); showTutorial(); }
 
 function renderHeader() {
-  const names={proposal:'Drawing…',depression:'Crisis',legislation:'Legislation',legislation_ask:'Legislation',reform:'Reform',reform_ask:'Reform',force_discard:'Discard',politics:'Clean Up'};
+  const names={proposal:'Drawing…',depression:'Crisis',legislation:'Legislation',force_discard:'Discard',politics:'Clean Up'};
   return `<header>
     <h1>THE NEW DEAL</h1>
     <div class="hud">
       <div class="hud-item"><span class="hud-label">Turn</span><span class="hud-value">${G.turn}/15</span></div>
-      <div class="hud-item"><span class="hud-label">Actions</span><span class="hud-value">${G.actions}</span></div>
       <div class="hud-item"><span class="hud-label">Deck</span><span class="hud-value">${G.deck.length}</span></div>
       <div class="hud-item"><span class="hud-label">Hand</span><span class="hud-value">${G.hand.length}</span></div>
       <span class="hud-phase">${names[G.phase]||G.phase}</span>
@@ -1181,11 +1193,19 @@ function renderHeader() {
 }
 
 function renderScoreboard() {
+  const vals=CATS.map(c=>G.scores[c]);
+  const lo=Math.min(...vals), hi=Math.max(...vals);
+  const total=lo*hi;
+  const loCat=CATS.find(c=>G.scores[c]===lo), hiCat=CATS.find(c=>G.scores[c]===hi);
   return `<div class="scoreboard">${CATS.map(c=>`<div class="score-cell" data-cat="${c}">
     <div class="cat-label" style="color:${CAT_COLOR[c]}">${CAT_ICON[c]} ${c}</div>
     <div class="cat-name">${CAT_FULL[c]}</div>
     <div class="cat-score" style="color:${CAT_COLOR[c]}">${G.scores[c]}</div>
-  </div>`).join('')}</div>`;
+  </div>`).join('')}<div class="score-total">
+    <div class="total-label">Score</div>
+    <div class="total-value">${total}</div>
+    <div class="total-tooltip">Lowest × Highest = Final Score<br>${CAT_FULL[loCat]} (${lo}) × ${CAT_FULL[hiCat]} (${hi}) = <b>${total}</b></div>
+  </div></div>`;
 }
 
 function renderMessage() {
@@ -1193,27 +1213,7 @@ function renderMessage() {
 }
 
 function renderHandArea() {
-  let html='';
-
-  // Meld category picker
-  if (G.phase==='reform' && !G.meldCat) {
-    html+=`<div style="width:100%;max-width:var(--max-w);padding:0 1.5rem;margin-bottom:0.4rem"><div class="cat-picker">`;
-    CATS.forEach(c=>{
-      const has=G.hand.some(cd=>!cd.crisis&&(cd.meld[c]||cd.meld._wild));
-      html+=`<button class="cat-btn" style="border-color:${CAT_COLOR[c]};color:${CAT_COLOR[c]}" ${has?`onclick="selectMeldCat('${c}')"`:'disabled'}>${CAT_ICON[c]} ${c}<br><span style="font-size:0.5rem">${CAT_FULL[c]}</span></button>`;
-    });
-    html+=`</div></div>`;
-  }
-
-  // Meld summary
-  if (G.meldCat && G.selected.size>0) {
-    const val=getMeldValue();
-    html+=`<div style="width:100%;max-width:var(--max-w);padding:0 1.5rem;margin-bottom:0.3rem">
-      <div class="meld-summary">Meld: <b style="color:${CAT_COLOR[G.meldCat]}">${CAT_ICON[G.meldCat]} ${CAT_FULL[G.meldCat]}</b> — <span class="meld-total">+${val}</span> (${G.selected.size} card${G.selected.size>1?'s':''})</div>
-    </div>`;
-  }
-
-  html+='<div class="hand-area">';
+  let html='<div class="hand-area">';
   if (!G.hand.length) html+='<div style="color:var(--text-dim);font-style:italic;padding:2rem">Your hand is empty.</div>';
 
   G.hand.forEach((card,idx)=>{
@@ -1224,7 +1224,6 @@ function renderHandArea() {
 
     if (G.phase==='depression') { if (card.crisis) clickable=true; else dimmed=true; }
     else if (G.phase==='legislation') { if (!card.crisis) clickable=true; else dimmed=true; }
-    else if (G.phase==='reform'&&G.meldCat) { if (!card.crisis&&(card.meld[G.meldCat]||card.meld._wild)) clickable=true; else dimmed=true; }
     else if (G.phase==='politics'||G.phase==='force_discard') { clickable=true; }
 
     if (clickable) cls.push('clickable');
@@ -1233,23 +1232,12 @@ function renderHandArea() {
     let onclick='';
     if (G.phase==='depression'&&card.crisis) onclick=`onclick="playCrisis(${idx})"`;
     else if (G.phase==='legislation'&&!card.crisis) onclick=`onclick="playLegislation(${idx})"`;
-    else if (G.phase==='reform'&&G.meldCat&&(card.meld[G.meldCat]||card.meld._wild)) onclick=`onclick="toggleMeldCard(${idx})"`;
     else if (G.phase==='politics'||G.phase==='force_discard') onclick=`onclick="toggleDiscardCard(${idx})"`;
 
-    let badges='';
-    if (!card.crisis) {
-      Object.keys(card.meld).filter(k=>k!=='_wild').forEach(c=>{
-        badges+=`<span class="cat-badge" style="background:${CAT_COLOR[c]}">${c}+${card.meld[c]}</span>`;
-      });
-      if (card.meld._wild) badges+=`<span class="cat-badge" style="background:var(--gold)">WILD+${card.meld._wild}</span>`;
-    }
-
-    const cats=card.crisis?'':Object.keys(card.meld).concat(card.meld._wild?CATS.slice():[]).filter(k=>k!=='_wild').join(',');
-    html+=`<div class="${cls.join(' ')}" ${onclick} data-cats="${cats}">
-      <div class="card-type">${card.crisis?'⚠ Crisis':'Policy'}</div>
+    html+=`<div class="${cls.join(' ')}" ${onclick}>
+      <div class="card-type">${card.crisis?'⚠ CRISIS':'POLICY'}</div>
       <div class="card-name">${card.name}</div>
-      <div class="card-effect">${descCardShort(card)}</div>
-      ${badges?`<div class="card-cats">${badges}</div>`:''}
+      ${card.desc?`<div class="card-desc">${card.desc}</div>`:''}
     </div>`;
   });
   html+='</div>';
@@ -1261,20 +1249,7 @@ function renderControls() {
   const phase=G.phase;
 
   if (phase==='legislation') {
-    h+=`<span class="pass-link" onclick="passPhase()">skip to Reform →</span>`;
-  } else if (phase==='legislation_ask') {
-    h+=`<button class="btn btn-gold" onclick="spendActionLeg()">Spend 1 Action — Play Again (${G.actions} left)</button>`;
-    h+=`<button class="btn btn-outline" onclick="passPhase()">Done → Reform</button>`;
-    h+=`<div style="width:100%;font-size:0.75rem;color:var(--text-dim);margin-top:0.3rem">Actions may be spent here to play an additional card, in the Reform phase for additional melds, or held for future turns</div>`;
-  } else if (phase==='reform'&&!G.meldCat) {
     h+=`<span class="pass-link" onclick="passPhase()">skip to Clean Up →</span>`;
-  } else if (phase==='reform'&&G.meldCat) {
-    const v=getMeldValue();
-    h+=`<button class="btn btn-gold" onclick="playMeld()" ${!G.selected.size?'disabled':''}>Play Meld (+${v} to ${CAT_FULL[G.meldCat]})</button>`;
-    h+=`<button class="btn btn-outline" onclick="cancelMeld()">Cancel</button>`;
-  } else if (phase==='reform_ask') {
-    h+=`<button class="btn btn-gold" onclick="spendActionRef()">Spend 1 Action — Another Meld (${G.actions} left)</button>`;
-    h+=`<button class="btn btn-outline" onclick="passPhase()">Done → Clean Up</button>`;
   } else if (phase==='force_discard') {
     const n=G.selected.size, need=G._fdCount||1;
     h+=`<button class="btn btn-gold" onclick="confirmForceDiscard()" ${n!==need?'disabled':''}>Discard ${n}/${need} Card${need!==1?'s':''}</button>`;
@@ -1296,31 +1271,6 @@ function renderLog() {
 }
 
 function toggleLog() { document.getElementById('logPanel').classList.toggle('hidden'); }
-
-// ==================== SCOREBOARD → HAND HIGHLIGHT ====================
-(function(){
-  const app=document.getElementById('app');
-  let activeCat=null;
-  app.addEventListener('mouseover', e=>{
-    const cell=e.target.closest('.score-cell');
-    if (!cell) return;
-    const cat=cell.dataset.cat;
-    if (cat===activeCat) return;
-    activeCat=cat;
-    document.querySelectorAll('.hand-area .card').forEach(c=>{
-      const cats=c.dataset.cats||'';
-      c.classList.toggle('cat-highlight', cats.split(',').includes(cat));
-    });
-  });
-  app.addEventListener('mouseout', e=>{
-    const cell=e.target.closest('.score-cell');
-    if (!cell) return;
-    const related=e.relatedTarget;
-    if (related && related.closest && related.closest('.score-cell')===cell) return;
-    activeCat=null;
-    document.querySelectorAll('.hand-area .card.cat-highlight').forEach(c=>c.classList.remove('cat-highlight'));
-  });
-})();
 
 // ==================== INIT ====================
 newGame();
