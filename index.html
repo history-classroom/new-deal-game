@@ -881,8 +881,10 @@ function depressionPhase() {
 }
 
 function playCrisis(idx) {
+  if (G.phase!=='depression') return;
   const card = G.hand[idx];
   if (!card||!card.crisis) return;
+  G.phase='crisis_resolving';
   G.hand.splice(idx,1); G.discard.push(card);
   addLog(`CRISIS: ${card.name}`);
   for (const e of card.effects) {
