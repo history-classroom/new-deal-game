@@ -378,8 +378,20 @@ h1 {
 .game-over .score-formula { font-size: 1.1rem; color: var(--text-dim); margin-bottom: 1.5rem; line-height: 1.6; }
 .game-over .rating { font-size: 1.5rem; margin-bottom: 0.8rem; font-family: var(--serif); }
 .game-over .rating-flavor {
-  font-size: 1.05rem; color: var(--text-dim); max-width: 480px; line-height: 1.7; margin-bottom: 2rem;
+  font-size: 1.05rem; color: var(--text-dim); max-width: 480px; line-height: 1.7; margin-bottom: 1.5rem;
   font-family: var(--serif); font-style: italic;
+}
+.rating-ladder {
+  display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 2rem;
+  width: 100%; max-width: 360px;
+}
+.rating-tier {
+  font-size: 0.8rem; padding: 0.3rem 0.8rem; color: var(--text-dim);
+  border-left: 3px solid var(--rule); font-family: var(--serif);
+}
+.rating-tier.active {
+  color: var(--text-dark); font-weight: 700; font-size: 0.95rem;
+  border-left: 3px solid var(--gold); background: rgba(107,42,20,0.06);
 }
 .game-over .final-cats {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
@@ -1037,13 +1049,24 @@ function endGame() {
   render();
 }
 
+const RATINGS = [
+  [0,  '💀 Hooverville','The Depression deepened under your watch. Millions remain without hope.'],
+  [8,  '📉 Tough Times','Some progress, but the recovery is painfully slow.'],
+  [20, '⚖️ Slow Recovery','The nation is healing, but unevenly.'],
+  [35, '🏛️ Steady Progress','The New Deal programs are working, and Americans can see a future.'],
+  [55, '🇺🇸 The New Deal Works!','Strong, balanced recovery across the board.'],
+  [Infinity, '⭐ A New Era!','An extraordinary achievement — a new age of prosperity.'],
+];
 function getRating(s) {
-  if (s<=0) return ['💀 Hooverville','The Depression deepened under your watch. Millions remain without hope. Perhaps a different approach is needed.'];
-  if (s<=8) return ['📉 Tough Times','Some progress, but the recovery is painfully slow. Too many Americans are still suffering.'];
-  if (s<=20) return ['⚖️ Slow Recovery','The nation is healing, but unevenly. Some sectors recovered while others were neglected.'];
-  if (s<=35) return ['🏛️ Steady Progress',"You've made real headway. The New Deal programs are working, and Americans can see a future again."];
-  if (s<=55) return ['🇺🇸 The New Deal Works!',"Strong, balanced recovery across the board. History will remember this as a turning point for America."];
-  return ['⭐ A New Era!','An extraordinary achievement. You balanced every sector of the economy and led America into a new age of prosperity.'];
+  for (const [max, title, flavor] of RATINGS) if (s<=max) return [title, flavor];
+  return RATINGS[RATINGS.length-1].slice(1);
+}
+function renderRatingLadder(score) {
+  return RATINGS.map(([max, title]) => {
+    const [playerTitle] = getRating(score);
+    const active = title === playerTitle;
+    return `<div class="rating-tier${active?' active':''}">${title}</div>`;
+  }).reverse().join('');
 }
 
 function passPhase() {
@@ -1207,6 +1230,7 @@ function renderGameOver(app) {
     <div class="final-score">${G.finalScore}</div>
     <div class="rating">${title}</div>
     <div class="rating-flavor">${flavor}</div>
+    <div class="rating-ladder">${renderRatingLadder(G.finalScore)}</div>
     <div class="btn-group">
       <button class="btn btn-gold btn-lg" onclick="startGame()">Play Again</button>
     </div>
