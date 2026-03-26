@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>New Deal — A Solitaire Card Game</title>
+<title>The New Deal</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -67,6 +67,18 @@ h1 {
   border: 2px solid var(--rule-dark); background: transparent;
   color: var(--text-dark); font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ===== TIMELINE ===== */
+.timeline { display: flex; gap: 0; align-items: center; }
+.timeline-year {
+  font-family: var(--serif); font-size: 0.7rem; padding: 0.2rem 0.45rem;
+  color: var(--text-dim); border-bottom: 2px solid transparent;
+  transition: all 0.3s; letter-spacing: 0.02em;
+}
+.timeline-year.active {
+  color: var(--text-dark); font-weight: 700; font-size: 0.85rem;
+  border-bottom-color: var(--gold);
 }
 
 /* ===== DECO ===== */
@@ -217,6 +229,7 @@ h1 {
 .toast.positive { border-left: 4px solid var(--green); }
 .toast.negative { border-left: 4px solid var(--red); }
 .toast.neutral { border-left: 4px solid var(--rule); }
+.toast.special { border-left: 4px solid var(--gold); background: #f5e6c8; font-weight: 600; }
 @keyframes toastIn { from { opacity:0; transform:translateX(1rem); } to { opacity:1; transform:translateX(0); } }
 @keyframes toastOut { from { opacity:1; } to { opacity:0; transform:translateY(-0.5rem); } }
 
@@ -420,8 +433,8 @@ h1 {
 // ==================== CONSTANTS ====================
 const CATS = ['IC','AR','FN','BK','NS','IF','PW','WF'];
 const CAT_FULL = {
-  IC:'Industry Codes', AR:'Agriculture', FN:'Finance', BK:'Banking',
-  NS:'National Spirit', IF:'Inflation', PW:'Public Works', WF:'Welfare'
+  IC:'Regulations', AR:'Agriculture', FN:'Finance', BK:'Banking',
+  NS:'Public Morale', IF:'Inflation', PW:'Public Works', WF:'Jobs & Relief'
 };
 const CAT_COLOR = {
   IC:'var(--cat-IC)', AR:'var(--cat-AR)', FN:'var(--cat-FN)', BK:'var(--cat-BK)',
@@ -431,14 +444,37 @@ const CAT_ICON = {
   IC:'🏭', AR:'🌾', FN:'📈', BK:'🏦', NS:'🗽', IF:'💲', PW:'🏗️', WF:'🤝'
 };
 const CAT_HINT = {
-  IC:'Factory regulations', AR:'Farming & crops', FN:'Wall Street reform',
-  BK:'Bank stability', NS:'Public morale', IF:'Money supply', PW:'Roads & dams', WF:'Jobs & relief'
+  IC:'Rules for factories & businesses — many were unsafe or exploitative',
+  AR:'Farming policy — crop prices had crashed, farmers were going broke',
+  FN:'Wall Street oversight — the stock market crash wiped out millions',
+  BK:'Bank stability — thousands of banks had failed, wiping out savings',
+  NS:'Public confidence — Americans were scared, hopeless, and angry',
+  IF:'Money supply & prices — deflation was making debts impossible to pay',
+  PW:'Roads, dams & public buildings — infrastructure created jobs',
+  WF:'Jobs & relief programs — 25% of workers were unemployed'
+};
+
+const CARD_TYPE = {
+  "Louis McHenry Howe":"ADVISOR", "Brain Trust":"ADVISORS",
+  "Raymond Moley":"ADVISOR", "Rexford Guy Tugwell":"ADVISOR",
+  "Adolf Berle Jr.":"ADVISOR", "Brandeis Group":"ADVISORS",
+  "Black Cabinet":"ADVISORS",
+  "Franklin Delano Roosevelt":"PRESIDENT",
+  "Frances Perkins":"APPOINTMENT", "Harold L. Ickes":"APPOINTMENT",
+  "Henry Agard Wallace":"APPOINTMENT", "Hugh Johnson":"APPOINTMENT",
+  "Jesse Jones":"APPOINTMENT", "Harry Hopkins":"APPOINTMENT",
+  "John Collier":"APPOINTMENT",
+  "Bold, Persistent Experimentation":"IDEALS",
+  "Restore Faith of the Nation":"IDEALS",
+  "Restore Shattered Economy":"IDEALS",
+  "Relief Recovery Reform":"IDEALS", "Sense of Purpose":"IDEALS",
+  "New Deal":"IDEALS", "Broad Programs":"IDEALS",
 };
 
 const CARD_DESC = {
   "Franklin Delano Roosevelt": "FDR won the 1932 presidency in a landslide during the worst of the Depression, with 25% unemployment. He launched the New Deal \u2014 relief, recovery, and reform programs starting with a historic first 100 days.",
   "Power of Government": "FDR dramatically expanded federal power, creating dozens of agencies for banking regulation, job creation, and social insurance. This shift established the idea that the federal government was responsible for citizens\u2019 economic well-being.",
-  "Louis McHenry Howe": "Howe was a former reporter who became FDR\u2019s most loyal political advisor, managing his career from 1909 through polio and beyond. As Secretary to the President, he shaped early programs like the CCC and mentored Eleanor into public life.",
+  "Louis McHenry Howe": "Howe was FDR\u2019s closest political strategist for over 20 years, masterminding his path from New York politics to the White House. From inside the West Wing, he helped shape early New Deal strategy and kept Roosevelt connected to public opinion during the critical first years.",
   "Bold, Persistent Experimentation": "In a 1932 speech, FDR declared the country needed to try something and, if it failed, try something else. This pragmatic philosophy guided the New Deal as programs were launched, tested, and replaced without rigid ideology.",
   "Broad Programs": "The New Deal spanned banking reform, farm aid, public works, rural electrification, and labor protections simultaneously. No previous president had attempted to reshape so many parts of American life at once.",
   "Social Welfare": "Before the New Deal, the federal government offered almost no direct help to poor, elderly, or unemployed Americans. FDR created Social Security and federal relief agencies, establishing a national duty to provide a basic safety net.",
@@ -552,7 +588,7 @@ const CARD_DESC = {
   "National Labor Relations Act": "The Wagner Act guaranteed private-sector workers the right to organize, bargain collectively, and strike with real enforcement. It created the NLRB and triggered a dramatic surge in union membership across the country.",
   "Social Security Act": "This act created federal old-age pensions, unemployment insurance, and aid for dependent children and the disabled. It established the first government safety net promising Americans basic economic security in old age and hard times.",
   "Unfair Labor Practices": "The Wagner Act defined specific illegal employer actions: interfering with organizing, dominating company unions, and refusing to bargain. For the first time, federal law spelled out what employers could not do to workers and gave the NLRB enforcement power.",
-  "Opposition by Big Business": "Corporate leaders bitterly opposed the New Deal, with the American Liberty League spending heavily to defeat FDR in 1936. Roosevelt won a historic landslide, carrying every state except Maine and Vermont.",
+  "Opposition by Big Business": "Major corporations and wealthy industrialists saw New Deal regulations as a threat to their profits and power. They funded the American Liberty League, arguing that government intervention in business was un-American and would destroy free enterprise.",
   "US Housing Authority": "The Wagner-Steagall Act of 1937 created a federal agency to lend money for slum clearance and low-cost public housing. It was the first ongoing federal commitment to providing affordable housing for low-income Americans.",
   "Home Owners Loan Corp.": "The HOLC refinanced roughly one million home mortgages in danger of foreclosure, rescuing homeowners and banks alike. It also introduced \"redlining\" \u2014 rating neighborhoods by lending risk in ways that systematically disadvantaged Black communities for generations.",
   "Federal Housing Admin.": "The FHA insured private mortgage loans so banks would offer longer, lower-interest home loans to ordinary Americans. It made homeownership accessible to the middle class, though its lending guidelines reinforced racial segregation in housing.",
@@ -572,17 +608,17 @@ const CARD_DESC = {
 const CARD_DATA = [
   ["Franklin Delano Roosevelt","A3|NS+2"],
   ["Power of Government","*+2"],
-  ["Louis McHenry Howe","D2|A2"],
+  ["Louis McHenry Howe","D1|A1"],
   ["Bold, Persistent Experimentation","D1&A2"],
   ["Broad Programs","**+1"],
   ["Social Welfare","NS+1|WF+1"],
   ["Unemployment Relief","WF+1|A2"],
   ["Restore Faith of the Nation","NS+1|D2"],
-  ["Restore Shattered Economy","*+1|D2"],
+  ["Restore Shattered Economy","*+1|D1"],
   ["Federal Regulation","FN+1|BK+1|IF+1"],
   ["!Outbursts of Violence","SL"],
   ["!Protests Against Foreclosures","SR"],
-  ["Brain Trust","D2|A2"],
+  ["Brain Trust","D1|A1"],
   ["Raymond Moley","D3"],
   ["Rexford Guy Tugwell","AR+2"],
   ["Adolf Berle Jr.","FN+1|BK+1"],
@@ -601,19 +637,19 @@ const CARD_DATA = [
   ["Repeal Prohibition","NS+2"],
   ["Relief Recovery Reform","**+1"],
   ["Ratify Amendment","A2|NS+2"],
-  ["Century of Progress","D3|NS+1"],
+  ["Century of Progress","D3"],
   ["Far Reaching Legislation","*+2"],
   ["!Farm Crisis","AR-1"],
   ["Stabilize Crop Prices","AR+1|IF+1"],
   ["Subsidize Scarcity","AR+1|IF+1"],
   ["Henry Agard Wallace","AR+2"],
   ["Agricultural Adjustment Act","AR+1|A2"],
-  ["Farm Subsidies","AR+1|D2"],
+  ["Farm Subsidies","AR+1|D1"],
   ["Harold L. Ickes","PW+2"],
   ["Farm Bill","AR+1|A2"],
   ["Go Off the Gold Standard","IF+2"],
   ["Stunning Press Release","NS+1&A1"],
-  ["Inflationary Proposal","IF+1|D2"],
+  ["Inflationary Proposal","IF+1|D1"],
   ["Gold Buying","IF+1|A2"],
   ["Silver Purchase Act","IF+1&A1"],
   ["Controlled Inflation","IF+2"],
@@ -624,7 +660,7 @@ const CARD_DATA = [
   ["Frances Perkins","IC+2"],
   ["Industry-Wide Agreements","IC+1|A2"],
   ["Antitrust Law Exemptions","IC+1|FN+1"],
-  ["Collective Bargaining","IC+1|D2"],
+  ["Collective Bargaining","IC+1|D1"],
   ["Worker's Rights","IC+1|WF+1"],
   ["Minimum Wages","IC+1|WF+1"],
   ["Public Works Administration","PW+1&D1"],
@@ -638,15 +674,15 @@ const CARD_DATA = [
   ["Dams & Power Plants","PW+1|A2"],
   ["Hospitals & Housing Projects","PW+1|WF+1"],
   ["Schools & Playgrounds","PW+1|NS+1"],
-  ["Reconstruction Finance Corp.","BK+1|D2"],
+  ["Reconstruction Finance Corp.","BK+1|D1"],
   ["Jesse Jones","BK+2"],
-  ["RFC Investments","PW+1|D2"],
+  ["RFC Investments","PW+1|D1"],
   ["Securities Act","FN+2"],
   ["Require Financial Statements","FN+1"],
   ["Deep Rooted Reform","FN+1|A2"],
   ["Securities & Exchange Commission","FN+1&A1"],
   ["!Wall Street Opposition","FN-1"],
-  ["Economic Legislation","FN+1|D2"],
+  ["Economic Legislation","FN+1|D1"],
   ["Sanction Unionization","IC+1"],
   ["!Poverty","WF-1"],
   ["!Run on Banks","BK-1"],
@@ -657,13 +693,13 @@ const CARD_DATA = [
   ["Federal Art Project","NS+1|WF+1"],
   ["Bread Lines","WF+1"],
   ["!Homelessness","WF-1"],
-  ["Welfare State","WF+1|D2"],
+  ["Welfare State","WF+1|D1"],
   ["!Dust Bowl","WF-1"],
   ["!Labor Disputes","IC-1"],
   ["!Political Challenges","NS-1"],
   ["!Riots","NS-1"],
   ["Harry Hopkins","WF+2"],
-  ["FERA Program","WF+1|D2"],
+  ["FERA Program","WF+1|D1"],
   ["Direct Relief","WF+1|A2"],
   ["Civil Works Administration","WF+1|PW+1"],
   ["Works Progress Administration","WF+1|PW+1|AR+1"],
@@ -677,8 +713,8 @@ const CARD_DATA = [
   ["Soil Conservation Service","AR+1&D1"],
   ["Tennessee Valley Authority","AR+1|PW+1"],
   ["Rural Electrification Admin.","PW+1&A1"],
-  ["Public Utility Holding Co. Act","FN+1|D2"],
-  ["Brandeis Group","FN+1|D2"],
+  ["Public Utility Holding Co. Act","FN+1|D1"],
+  ["Brandeis Group","FN+1|D1"],
   ["Second Hundred Days","D2&A2|FN+1"],
   ["Revenue Act","FN+1|A2"],
   ["Estate, Gift & Capital Taxes","FN+1&A1"],
@@ -698,7 +734,7 @@ const CARD_DATA = [
   ["John Collier","WF+2"],
   ["!Supreme Court Rulings","NM"],
   ["!Recession","IF-1"],
-  ["Anti-Trust Policy","FN+1|D2"],
+  ["Anti-Trust Policy","FN+1|D1"],
 ];
 
 // ==================== CARD PARSER ====================
@@ -749,10 +785,10 @@ function descEffect(e) {
     case 'any_one': return `Any category +${e.value}`;
     case 'any_two': return `Choose 2 categories, each +${e.value}`;
     case 'force_discard': return `then discard ${e.value}`;
-    case 'skip_legislation': return 'Skip your Legislation step this turn';
-    case 'reduce_plays': return 'Lose 1 legislation play this turn';
+    case 'skip_legislation': return 'Skip your Legislation step this year';
+    case 'reduce_plays': return 'Lose 1 legislation play this year';
     case 'discard_random': return 'Lose 1 random card from your hand';
-    case 'negate_actions': return 'Lose 1 legislation play this turn';
+    case 'negate_actions': return 'Lose 1 legislation play this year';
     case 'reduce_highest': return 'Your highest category loses 2 points';
     default: return '?';
   }
@@ -803,10 +839,10 @@ function setMsg(t, crisis=false) { G.message=t; G.crisisMsg=crisis; }
 // ==================== PHASE LOGIC ====================
 function startTurn() {
   G.turn++;
-  if (G.turn > 15) { endGame(); return; }
+  if (G.turn > 8) { endGame(); return; }
   G.skipLeg=false; G.legPlays=0; G.legMax=3;
   G.selected.clear();
-  addLog(`── Turn ${G.turn} ──`);
+  addLog(`── ${1932+G.turn} ──`);
   proposalPhase();
 }
 
@@ -814,7 +850,7 @@ function proposalPhase() {
   G.phase = 'proposal';
   const need = Math.max(0, 9-G.hand.length);
   if (need>0) { G.hand.push(...drawCards(need)); addLog(`Drew ${need} cards (hand: ${G.hand.length})`); }
-  setMsg(`<b>Turn ${G.turn} of 15</b> — You drew cards. Your hand is full.`);
+  setMsg(`<b>${1932+G.turn}</b> — You drew cards. Your hand is full.`);
   setTimeout(()=>{ depressionPhase(); }, 500);
   render();
 }
@@ -824,8 +860,8 @@ function depressionPhase() {
   const crisis = G.hand.filter(c=>c.crisis);
   if (!crisis.length) {
     addLog('No crisis cards.');
-    setMsg('Good news — no crises this turn! Moving to Legislation...');
-    setTimeout(()=>{ legislationPhase(); }, 600);
+    setMsg('Good news — no crises this year! Moving to Legislation...');
+    setTimeout(()=>{ legislationPhase(); }, 1200);
     render(); return;
   }
   setMsg(`⚠️ <b>Crisis!</b> You have <b>${crisis.length}</b> crisis card${crisis.length>1?'s':''}. You must play one — click a <span style="color:var(--crisis-text)">red card</span> to resolve it.`, true);
@@ -856,7 +892,7 @@ function playCrisis(idx) {
     }
   }
   setMsg(`Crisis resolved: <b>${card.name}</b> — ${card.effects.map(descEffect).join(', ')}`, true);
-  setTimeout(()=>{ legislationPhase(); }, 900);
+  setTimeout(()=>{ legislationPhase(); }, 2500);
   render();
 }
 
@@ -867,7 +903,7 @@ function legislationPhase() {
   }
   G.phase='legislation'; G.selected.clear();
   const rem=G.legMax-G.legPlays;
-  setMsg(`⚖️ <b>Legislation</b> — Click a card to play it. (${G.legPlays+1} of ${G.legMax})`);
+  setMsg(`⚖️ <b>Choose a piece of legislation to support.</b> (${G.legPlays+1} of ${G.legMax})`);
   render();
 }
 function hasPlayableCards() { return G.hand.some(c=>!c.crisis); }
@@ -894,7 +930,7 @@ function resolveEffects(effects, cb) {
       case 'actions': G.legMax+=e.value; addLog(`  +${e.value} extra play${e.value>1?'s':''}`); showToast(`+${e.value} extra play${e.value>1?'s':''}`,'positive'); next(); break;
       case 'force_discard': showForceDiscardModal(e.value, next); return;
       case 'any_one': showCatPickerModal(1,e.value,next); return;
-      case 'any_two': showCatPickerModal(2,e.value,next); return;
+      case 'any_two': showToast('★ Special card! Choose 2 categories to boost!','special'); showCatPickerModal(2,e.value,next); return;
       default: next();
     }
   }
@@ -931,7 +967,7 @@ function renderCatPicker() {
   CATS.forEach(cat=>{
     const picked=G._cpPicked.includes(cat);
     const dis=!picked&&rem<=0;
-    h+=`<button class="cat-btn${picked?' active':''}" style="border-color:${CAT_COLOR[cat]};color:${CAT_COLOR[cat]};${picked?'background:'+CAT_COLOR[cat]:''}" ${dis?'disabled':''} onclick="pickCat('${cat}')">${CAT_ICON[cat]}<br>${cat}<br><span style="font-size:0.55rem;opacity:0.7">${CAT_FULL[cat]}: ${G.scores[cat]}</span></button>`;
+    h+=`<button class="cat-btn${picked?' active':''}" style="border-color:${CAT_COLOR[cat]};color:${CAT_COLOR[cat]};${picked?'background:'+CAT_COLOR[cat]:''}" ${dis?'disabled':''} onclick="pickCat('${cat}')">${CAT_ICON[cat]}<br>${CAT_FULL[cat]}<br><span style="font-size:0.55rem;opacity:0.7">Current: ${G.scores[cat]}</span></button>`;
   });
   h+=`</div>`;
   if (G._cpPicked.length===G._cpCount) h+=`<div class="btn-group" style="margin-top:1rem"><button class="btn btn-gold" onclick="confirmCatPick()">Confirm</button></div>`;
@@ -984,7 +1020,7 @@ function confirmDiscard() {
   for (const i of indices) G.discard.push(G.hand.splice(i,1)[0]);
   addLog(`Discarded ${names.length}: ${names.join(', ')}`);
   G.selected.clear();
-  setMsg(`Discarded ${names.length} card${names.length>1?'s':''}. Turn ${G.turn} complete!`);
+  setMsg(`Discarded ${names.length} card${names.length>1?'s':''}. ${1932+G.turn} complete!`);
   render();
   setTimeout(()=>startTurn(), 700);
 }
@@ -1003,10 +1039,10 @@ function endGame() {
 
 function getRating(s) {
   if (s<=0) return ['💀 Hooverville','The Depression deepened under your watch. Millions remain without hope. Perhaps a different approach is needed.'];
-  if (s<=15) return ['📉 Tough Times','Some progress, but the recovery is painfully slow. Too many Americans are still suffering.'];
-  if (s<=35) return ['⚖️ Slow Recovery','The nation is healing, but unevenly. Some sectors recovered while others were neglected.'];
-  if (s<=60) return ['🏛️ Steady Progress',"You've made real headway. The New Deal programs are working, and Americans can see a future again."];
-  if (s<=100) return ['🇺🇸 The New Deal Works!',"Strong, balanced recovery across the board. History will remember this as a turning point for America."];
+  if (s<=8) return ['📉 Tough Times','Some progress, but the recovery is painfully slow. Too many Americans are still suffering.'];
+  if (s<=20) return ['⚖️ Slow Recovery','The nation is healing, but unevenly. Some sectors recovered while others were neglected.'];
+  if (s<=35) return ['🏛️ Steady Progress',"You've made real headway. The New Deal programs are working, and Americans can see a future again."];
+  if (s<=55) return ['🇺🇸 The New Deal Works!',"Strong, balanced recovery across the board. History will remember this as a turning point for America."];
   return ['⭐ A New Era!','An extraordinary achievement. You balanced every sector of the economy and led America into a new age of prosperity.'];
 }
 
@@ -1021,7 +1057,7 @@ function showToast(text, type='neutral') {
   el.className=`toast ${type}`;
   el.textContent=text;
   document.getElementById('toasts').appendChild(el);
-  setTimeout(()=>el.remove(), 2400);
+  setTimeout(()=>el.remove(), 4000);
 }
 
 // ==================== SCORE FLASH ====================
@@ -1043,7 +1079,7 @@ const TUTORIAL_PAGES = [
     <div class="t-section">
       <h2>🇺🇸 Welcome, Mr. President</h2>
       <p>The year is <b>1932</b>. America is in the grip of the <b>Great Depression</b> — the worst economic crisis in the nation's history. Banks are failing, factories are closing, and millions are out of work.</p>
-      <p>You are <b>Franklin Delano Roosevelt</b>, the newly elected President. Over the next 15 turns, you'll pass legislation, launch programs, and fight crises to pull the country back from the brink.</p>
+      <p>You are <b>Franklin Delano Roosevelt</b>, the newly elected President. Over the next 8 years (1933–1940), you'll pass legislation, launch programs, and fight crises to pull the country back from the brink.</p>
       <div class="t-highlight">This game is based on the real programs, people, and legislation of Roosevelt's <b>New Deal</b> (1933–1937).</div>
     </div>`,
   ()=>`
@@ -1051,7 +1087,7 @@ const TUTORIAL_PAGES = [
       <h2>📊 Your 8 Recovery Goals</h2>
       <p>You're trying to improve <b>8 areas</b> of the American economy. Each starts at zero. Your job is to raise them all.</p>
       <div class="t-cats-grid">
-        ${CATS.map(c=>`<div class="t-cat"><div class="t-cat-icon">${CAT_ICON[c]}</div><div class="t-cat-label" style="color:${CAT_COLOR[c]}">${c}</div><div class="t-cat-desc">${CAT_HINT[c]}</div></div>`).join('')}
+        ${CATS.map(c=>`<div class="t-cat"><div class="t-cat-icon">${CAT_ICON[c]}</div><div class="t-cat-label" style="color:${CAT_COLOR[c]}">${CAT_FULL[c]}</div><div class="t-cat-desc">${CAT_HINT[c]}</div></div>`).join('')}
       </div>
       <div class="t-highlight">
         ⚠️ <b>Key rule:</b> Your final score is your <b>lowest</b> category × your <b>highest</b> category.<br>
@@ -1060,8 +1096,8 @@ const TUTORIAL_PAGES = [
     </div>`,
   ()=>`
     <div class="t-section">
-      <h2>🔄 How a Turn Works</h2>
-      <p>Each turn has <b>5 simple steps</b>. Don't worry — the game guides you through each one!</p>
+      <h2>🔄 How a Year Works</h2>
+      <p>Each year has <b>4 simple steps</b>. Don't worry — the game guides you through each one!</p>
       <div class="t-steps">
         <div class="t-step"><div class="t-step-num">1</div><div class="t-step-text"><b>Draw Cards</b><span class="t-detail">Your hand fills up to 9 cards. This happens automatically.</span></div></div>
         <div class="t-step"><div class="t-step-num">2</div><div class="t-step-text"><b>Handle Crises</b><span class="t-detail">If you have any red "Crisis" cards, you must play one. These are bad events — pick the least harmful one.</span></div></div>
@@ -1072,8 +1108,8 @@ const TUTORIAL_PAGES = [
   ()=>`
     <div class="t-section">
       <h2>🃏 How Cards Work</h2>
-      <p>Each card represents a real New Deal program, person, or policy. When you play a card, <b>all of its effects</b> are applied automatically — you might boost one or more categories, draw extra cards, or earn extra plays this turn.</p>
-      <p>Some cards give you <b>extra plays</b> beyond the normal 3, letting you pass more legislation in a single turn!</p>
+      <p>Each card represents a real New Deal program, person, or policy. When you play a card, <b>all of its effects</b> are applied automatically — you might boost one or more categories, draw extra cards, or earn extra plays this year.</p>
+      <p>Some cards give you <b>extra plays</b> beyond the normal 3, letting you pass more legislation in a single year!</p>
       <div class="t-highlight">
         <b>Tip:</b> Read the historical descriptions on each card — every card is a real piece of New Deal history!
       </div>
@@ -1083,10 +1119,10 @@ const TUTORIAL_PAGES = [
       <h2>🎯 Tips for Success</h2>
       <ul>
         <li><b>Balance your scores.</b> Lowest × Highest means a zero in any category gives you a score of zero. Spread the love!</li>
-        <li><b>Play all 3 cards each turn.</b> Every card you play helps — don't waste your plays!</li>
+        <li><b>Play all 3 cards each year.</b> Every card you play helps — don't waste your plays!</li>
         <li><b>Discard crisis cards</b> in the cleanup step when you can — get them out of your hand before you're forced to play them.</li>
-        <li><b>Extra plays are powerful.</b> Some cards let you play more cards in the same turn.</li>
-        <li>Don't panic! Even bad turns are historically accurate. 😄</li>
+        <li><b>Extra plays are powerful.</b> Some cards let you play more cards in the same year.</li>
+        <li>Don't panic! Even bad years are historically accurate. 😄</li>
       </ul>
       <div class="t-highlight">
         <b>Ready?</b> The game will guide you through each step. Look for the blue help box below the scores — it explains what to do.
@@ -1141,10 +1177,10 @@ function renderTitle(app) {
     <h1>THE NEW DEAL</h1>
     <p class="dateline">Washington, D.C. &mdash; November 1932</p>
     <p class="flavor">
-      The nation reels from the Great Depression.<br>
-      As Franklin D. Roosevelt, you must steer America toward recovery &mdash;<br>
-      balancing industry, agriculture, finance, and welfare<br>
-      across 15 critical turns of New Deal policymaking.
+      The nation reels from the Great Depression &mdash; banks have failed,<br>
+      factories sit idle, and one in four Americans is out of work.<br>
+      As Franklin D. Roosevelt, you'll sign legislation, launch relief programs,<br>
+      and appoint key advisors to pull the country back from the brink.
     </p>
     <button class="btn btn-gold btn-lg" onclick="showTutorial()">Read the Bulletin</button>
     <p class="credit">Based on the card game by Lloyd Krassner (Warp Spawn Games, 2012)</p>
@@ -1157,12 +1193,12 @@ function renderGameOver(app) {
   CATS.forEach(c=>{
     const low=G.scores[c]===G.finalMin, high=G.scores[c]===G.finalMax;
     cats+=`<div class="fc${low?' is-low':''}${high?' is-high':''}">
-      <div class="fcl" style="color:${CAT_COLOR[c]}">${CAT_ICON[c]} ${c}</div>
+      <div class="fcl" style="color:${CAT_COLOR[c]}">${CAT_ICON[c]} ${CAT_FULL[c]}</div>
       <div class="fcv">${G.scores[c]}</div>
     </div>`;
   });
   app.innerHTML = `<div class="game-over">
-    <h2>EXTRA! &mdash; Final Edition, 1937</h2>
+    <h2>EXTRA! &mdash; Final Edition, 1941</h2>
     <div class="final-cats">${cats}</div>
     <div class="score-formula">
       Lowest: <b style="color:var(--red)">${CAT_FULL[G.finalMinCat]} (${G.finalMin})</b> ×
@@ -1181,10 +1217,14 @@ function startGame() { newGame(); showTutorial(); }
 
 function renderHeader() {
   const names={proposal:'Drawing…',depression:'Crisis',legislation:'Legislation',force_discard:'Discard',politics:'Clean Up'};
+  const currentYear = 1932 + G.turn;
+  const timeline = Array.from({length:8},(_,i)=>1933+i).map(y=>
+    `<span class="timeline-year${y===currentYear?' active':''}">${y}</span>`
+  ).join('');
   return `<header>
     <h1>THE NEW DEAL</h1>
+    <div class="timeline">${timeline}</div>
     <div class="hud">
-      <div class="hud-item"><span class="hud-label">Turn</span><span class="hud-value">${G.turn}/15</span></div>
       <div class="hud-item"><span class="hud-label">Deck</span><span class="hud-value">${G.deck.length}</span></div>
       <div class="hud-item"><span class="hud-label">Hand</span><span class="hud-value">${G.hand.length}</span></div>
       <span class="hud-phase">${names[G.phase]||G.phase}</span>
@@ -1198,7 +1238,7 @@ function renderScoreboard() {
   const total=lo*hi;
   const loCat=CATS.find(c=>G.scores[c]===lo), hiCat=CATS.find(c=>G.scores[c]===hi);
   return `<div class="scoreboard">${CATS.map(c=>`<div class="score-cell" data-cat="${c}">
-    <div class="cat-label" style="color:${CAT_COLOR[c]}">${CAT_ICON[c]} ${c}</div>
+    <div class="cat-label" style="color:${CAT_COLOR[c]}">${CAT_ICON[c]}</div>
     <div class="cat-name">${CAT_FULL[c]}</div>
     <div class="cat-score" style="color:${CAT_COLOR[c]}">${G.scores[c]}</div>
   </div>`).join('')}<div class="score-total">
@@ -1235,7 +1275,7 @@ function renderHandArea() {
     else if (G.phase==='politics'||G.phase==='force_discard') onclick=`onclick="toggleDiscardCard(${idx})"`;
 
     html+=`<div class="${cls.join(' ')}" ${onclick}>
-      <div class="card-type">${card.crisis?'⚠ CRISIS':'POLICY'}</div>
+      <div class="card-type">${card.crisis?'⚠ CRISIS':(CARD_TYPE[card.name]||'POLICY')}</div>
       <div class="card-name">${card.name}</div>
       ${card.desc?`<div class="card-desc">${card.desc}</div>`:''}
     </div>`;
